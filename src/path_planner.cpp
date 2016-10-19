@@ -9,12 +9,14 @@ int main(int argc, char** argv) {
     ros::NodeHandle nh_;
     ros::Publisher waypointPublisher = nh_.advertise<fcu_common::FW_Waypoint>("waypoint_path",10);
 
-    float Va = 8.5;//11;
+    ros::Duration(0.5).sleep();
+
+    float Va = 30;//11;
     float wps[5*num_waypoints] = {
-                -10, -10, -30, -45, Va,
-                -10, -125, -30, -135*M_PI/180, Va,
-                -125, -10, -30, 45*M_PI/180, Va,
-                -125, -125, -30, 135*M_PI/180, Va,
+				1000, 0, -100, 0, Va,
+				0, -1000, -100, 0, Va,
+				-1000, 0, -100, 0, Va,
+				0, 1000, -100, 0, Va,
                };
 
     for(int i(0);i<num_waypoints;i++)
@@ -27,7 +29,7 @@ int main(int argc, char** argv) {
         new_waypoint.w[2] = wps[i*5 + 2];
         new_waypoint.chi_d = wps[i*5 + 3];
 
-        new_waypoint.chi_valid = true;//false;
+        new_waypoint.chi_valid = false;//true;
         new_waypoint.Va_d = wps[i*5 + 4];
 
         waypointPublisher.publish(new_waypoint);
