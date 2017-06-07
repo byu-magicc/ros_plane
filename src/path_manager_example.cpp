@@ -198,6 +198,7 @@ void path_manager_example::manage_dubins(const params_s &params, const input_s &
     p(1) = input.pe;
     p(2) = -input.h;
     float R_min = params.R_min;
+    
     switch(_dub_state)
     {
     case dubin_state::First:

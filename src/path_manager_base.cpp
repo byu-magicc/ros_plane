@@ -42,7 +42,7 @@ void path_manager_base::vehicle_state_callback(const rosflight_msgs::StateConstP
 
     if (_state_init == true && _waypoint_init == true)
     {
-        manage(params, input, outputs);
+        manage(params_, input, outputs);
         current_path_publish(outputs);
     }
 }
