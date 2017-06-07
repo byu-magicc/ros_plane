@@ -33,6 +33,7 @@ void path_follower::follow(const params_s &params, const input_s &input, output_
     {
       ROS_INFO_STREAM("Params are: \n params.k_path" << params.k_path << "\n chi_infty = " << params.chi_infty);
       ROS_INFO_STREAM("Params are: \n params.k_orbit" << params.k_orbit << "\n rho_orbit = " << input.rho_orbit << "\n lam_orbit = " << input.lam_orbit);
+      // ROS_INFO_STREAM("Center of Orbit: \n N: " << input.c_orbit[0] << "\n E: " << input.c_orbit[1] << "\n D: " << input.c_orbit[2] << "\n");
         float d = sqrtf(powf((input.pn - input.c_orbit[0]),2) + powf((input.pe - input.c_orbit[1]),2)); // distance from orbit center
         // compute wrapped version of angular position on orbit
         float varphi = atan2f(input.pe - input.c_orbit[1], input.pn - input.c_orbit[0]);

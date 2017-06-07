@@ -7,7 +7,7 @@ namespace rosplane {
     nh_(ros::NodeHandle()),
     nh_private_(ros::NodeHandle("~"))
   {
-    _vehicle_state_sub = nh_.subscribe<fcu_common::State>("state", 1, &path_follower_base::vehicle_state_callback, this);
+    _vehicle_state_sub = nh_.subscribe<rosflight_msgs::State>("state", 1, &path_follower_base::vehicle_state_callback, this);
     _current_path_sub = nh_.subscribe<ros_plane::Current_Path>("current_path",1, &path_follower_base::current_path_callback, this);
 
 
@@ -22,6 +22,9 @@ namespace rosplane {
     memset(&_current_path, 0, sizeof(_current_path));
     update_timer_ = nh_.createTimer(ros::Duration(1.0/update_rate_), &path_follower_base::update, this);
     controller_commands_pub_ = nh_.advertise<ros_plane::Controller_Commands>("controller_commands",1);
+
+      ROS_DEBUG("Get Namespace %s \n",nh_private_.getNamespace().c_str());
+      ROS_DEBUG("K_ORBIT: %f \n", _params.k_orbit);
   }
 
 void path_follower_base::update(const ros::TimerEvent &)
@@ -38,7 +41,7 @@ void path_follower_base::update(const ros::TimerEvent &)
   controller_commands_pub_.publish(msg);
 }
 
-void path_follower_base::vehicle_state_callback(const fcu_common::StateConstPtr& msg)
+void path_follower_base::vehicle_state_callback(const rosflight_msgs::StateConstPtr& msg)
 {
   _vehicle_state = *msg;
   _input.pn = _vehicle_state.position[0];               /** position north */
