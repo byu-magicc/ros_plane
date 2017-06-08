@@ -1,6 +1,6 @@
 #include "path_manager_example.h"
 //#include <iostream>
-#include<cmath>
+#include <cmath>
 
 namespace rosplane {
 
@@ -401,14 +401,14 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
         float theta, theta2;
         // compute L1
         theta = atan2f(cre(1) - crs(1), cre(0) - crs(0));
-        float L1 = (crs - cre).size() + R*mo(2*M_PI_F + mo(theta - M_PI_2_F) - mo(_dubinspath.chis - M_PI_2_F))
+        float L1 = (crs - cre).norm() + R*mo(2*M_PI_F + mo(theta - M_PI_2_F) - mo(_dubinspath.chis - M_PI_2_F))
                 + R*mo(2*M_PI_F + mo(_dubinspath.chie - M_PI_2_F) - mo(theta - M_PI_2_F));
 
         // compute L2
-        ell = (cle - crs).size();
+        ell = (cle - crs).norm();
         theta = atan2f(cle(1) - crs(1), cle(0) - crs(0));
         float L2;
-        if(2*R/ell > 1.0f || 2*R/ell < -1.0f)
+        if(2*R > ell)
             L2 = 9999.0f;
         else
         {
@@ -418,10 +418,10 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
         }
 
         // compute L3
-        ell = (cre - cls).size();
+        ell = (cre - cls).norm();
         theta = atan2f(cre(1) - cls(1), cre(0) - cls(0));
         float L3;
-        if(2*R/ell > 1.0f || 2*R/ell < -1.0f)
+        if(2*R > ell)
             L3 = 9999.0f;
         else
         {
@@ -432,7 +432,7 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
 
         // compute L4
         theta = atan2f(cle(1) - cls(1), cle(0) - cls(0));
-        float L4 = (cls - cle).size() + R*mo(2*M_PI_F + mo(_dubinspath.chis + M_PI_2_F) - mo(theta + M_PI_2_F))
+        float L4 = (cls - cle).norm() + R*mo(2*M_PI_F + mo(_dubinspath.chis + M_PI_2_F) - mo(theta + M_PI_2_F))
                 + R*mo(2*M_PI_F + mo(theta + M_PI_2_F) - mo(_dubinspath.chie + M_PI_2_F));
 
         // L is the minimum distance
@@ -463,7 +463,7 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
             _dubinspath.lams = 1;
             _dubinspath.ce = cle;
             _dubinspath.lame = -1;
-            ell = (cle - crs).size();
+            ell = (cle - crs).norm();
             theta = atan2f(cle(1) - crs(1), cle(0) - crs(0));
             theta2 = theta - M_PI_2_F + asinf(2*R/ell);
             _dubinspath.q1 = rotz(theta2 + M_PI_2_F)*e1;
@@ -475,7 +475,7 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
             _dubinspath.lams = -1;
             _dubinspath.ce = cre;
             _dubinspath.lame = 1;
-            ell = (cre - cls).size();
+            ell = (cre - cls).norm();
             theta = atan2f(cre(1) - cls(1), cre(0) - cls(0));
             theta2 = acosf(2*R/ell);
             _dubinspath.q1 = rotz(theta + theta2 - M_PI_2_F)*e1;
