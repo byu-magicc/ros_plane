@@ -26,7 +26,7 @@ void controller_example::control(const params_s &params, const input_s &input, o
         output.phi_c = 0;
         output.delta_a = roll_hold(0.0, input.phi, input.p, params, input.Ts);
         output.delta_t = params.max_t;
-        output.theta_c = 15*3.14/180;
+        output.theta_c = 30*3.14/180;
         if(input.h >= params.alt_toz) {
 //            ROS_INFO("climb");
             current_zone = alt_zones::Climb;

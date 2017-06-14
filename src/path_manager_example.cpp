@@ -16,7 +16,7 @@ void path_manager_example::manage(const params_s &params, const input_s &input, 
     if(_num_waypoints < 2)
     {
         output.flag = true;
-        output.Va_d = 9;
+        output.Va_d = 18;
         output.r[0] = input.pn;
         output.r[1] = input.pe;
         output.r[2] = -input.h;
@@ -217,9 +217,15 @@ void path_manager_example::manage_dubins(const params_s &params, const input_s &
         output.rho = _dubinspath.R;
         output.lambda = _dubinspath.lams;
         if(dot(p - _dubinspath.w1, _dubinspath.q1) >= 0) // start in H1
+        {
             _dub_state = dubin_state::Before_H1_wrong_side;
+            ROS_INFO("Dubins State: Before H1 Wrong Side");
+        }
         else
+        {
             _dub_state = dubin_state::Before_H1;
+            ROS_INFO("Dubins State: Before H1");
+        }
         break;
     case dubin_state::Before_H1:
         output.flag = false;
@@ -236,7 +242,10 @@ void path_manager_example::manage_dubins(const params_s &params, const input_s &
         output.rho = _dubinspath.R;
         output.lambda = _dubinspath.lams;
         if(dot(p - _dubinspath.w1, _dubinspath.q1) >= 0) // entering H1
+        {
             _dub_state = dubin_state::Straight;
+            ROS_INFO("Dubins State: Straight");
+        }
         break;
     case dubin_state::Before_H1_wrong_side:
         output.flag = false;
@@ -253,7 +262,10 @@ void path_manager_example::manage_dubins(const params_s &params, const input_s &
         output.rho = _dubinspath.R;
         output.lambda = _dubinspath.lams;
         if(dot(p - _dubinspath.w1, _dubinspath.q1) < 0) // exit H1
+        {
             _dub_state = dubin_state::Before_H1;
+            ROS_INFO("Dubins State: Before H1");
+        }
         break;
     case dubin_state::Straight:
         output.flag = true;
@@ -261,6 +273,9 @@ void path_manager_example::manage_dubins(const params_s &params, const input_s &
         output.r[0] = _dubinspath.w1(0);
         output.r[1] = _dubinspath.w1(1);
         output.r[2] = _dubinspath.w1(2);
+        // output.r[0] = _dubinspath.z1(0);
+        // output.r[1] = _dubinspath.z1(1);
+        // output.r[2] = _dubinspath.z1(2);
         output.q[0] = _dubinspath.q1(0);
         output.q[1] = _dubinspath.q1(1);
         output.q[2] = _dubinspath.q1(2);
@@ -272,9 +287,15 @@ void path_manager_example::manage_dubins(const params_s &params, const input_s &
         if(dot(p - _dubinspath.w2, _dubinspath.q1) >= 0) // entering H2
         {
             if(dot(p - _dubinspath.w3, _dubinspath.q3) >= 0) // start in H3
+            {
                 _dub_state = dubin_state::Before_H3_wrong_side;
+                ROS_INFO("Dubins State: Before H3 Wrong Side");
+            }
             else
+            {
                 _dub_state = dubin_state::Before_H3;
+                ROS_INFO("Dubins State: Before H3");
+            }
         }
         break;
     case dubin_state::Before_H3:
@@ -314,9 +335,15 @@ void path_manager_example::manage_dubins(const params_s &params, const input_s &
 
             //start new path
             if(dot(p - _dubinspath.w1, _dubinspath.q1) >= 0) // start in H1
+            {
                 _dub_state = dubin_state::Before_H1_wrong_side;
+                ROS_INFO("Dubins State: Before H1 Wrong Side");
+            }
             else
+            {
                 _dub_state = dubin_state::Before_H1;
+                ROS_INFO("Dubins State Before H1");
+            }
         }
         break;
     case dubin_state::Before_H3_wrong_side:
@@ -334,7 +361,10 @@ void path_manager_example::manage_dubins(const params_s &params, const input_s &
         output.rho = _dubinspath.R;
         output.lambda = _dubinspath.lame;
         if(dot(p - _dubinspath.w3, _dubinspath.q3) < 0) // exit H3
+        {
             _dub_state = dubin_state::Before_H1;
+            ROS_INFO("Dubins State: Before H1");
+        }
         break;
     }
 }
@@ -345,8 +375,12 @@ Eigen::Matrix3f path_manager_example::rotz(float theta)
     //    R.zero();
     R(0,0) = cosf(theta);
     R(0,1) = -sinf(theta);
+    R(0,2) = 0;
     R(1,0) = sinf(theta);
     R(1,1) = cosf(theta);
+    R(1,2) = 0;
+    R(2,0) = 0;
+    R(2,1) = 0;
     R(2,2) = 1;
 
     return R;
@@ -384,6 +418,9 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
         _dubinspath.pe(1) = end_node.w[1];
         _dubinspath.pe(2) = end_node.w[2];
         _dubinspath.chie = end_node.chi_d;
+
+        ROS_WARN_STREAM("ps: " << _dubinspath.ps);
+        ROS_WARN_STREAM("pe: " << _dubinspath.pe);
 
         Eigen::Vector3f crs = _dubinspath.ps;
         crs(0) += R*(cosf(M_PI_2_F)*cosf(_dubinspath.chis) - sinf(M_PI_2_F)*sinf(_dubinspath.chis));
@@ -445,9 +482,17 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
         if(L4 < _dubinspath.L)
         { _dubinspath.L = L4; idx = 4; }
 
+        ROS_WARN("L1: %f \n", L1);
+        ROS_WARN("L2: %f \n", L2);
+        ROS_WARN("L3: %f \n", L3);
+        ROS_WARN("L4: %f \n", L4);
+        ROS_WARN("idx: %i \n", idx);
+
         Eigen::Vector3f e1;
         //        e1.zero();
         e1(0) = 1;
+        e1(1) = 0;
+        e1(2) = 0;
         switch(idx) {
         case 1:
             _dubinspath.cs = crs;
@@ -481,6 +526,11 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
             _dubinspath.q1 = rotz(theta + theta2 - M_PI_2_F)*e1;
             _dubinspath.w1 = _dubinspath.cs + (rotz(theta + theta2)*e1)*R;
             _dubinspath.w2 = _dubinspath.ce + (rotz(theta + theta2 - M_PI_F)*e1)*R;
+            ROS_WARN("theta: %f \n", theta);
+            ROS_WARN("theta2: %f \n", theta2);
+            ROS_WARN_STREAM("e1: " << e1);
+            ROS_WARN("ell: %f \n", ell);
+            ROS_WARN_STREAM("Rotate: "<<rotz(theta + theta2 - M_PI_2_F));
             break;
         case 4:
             _dubinspath.cs = cls;
@@ -495,6 +545,19 @@ void path_manager_example::dubinsParameters(const waypoint_s start_node, const w
         _dubinspath.w3 = _dubinspath.pe;
         _dubinspath.q3 = rotz(_dubinspath.chie)*e1;
         _dubinspath.R = R;
+
+
+        ROS_WARN_STREAM("cs: " << _dubinspath.cs);
+        ROS_WARN("lams: %i \n", _dubinspath.lams);
+        ROS_WARN_STREAM("ce:" << _dubinspath.ce);
+        ROS_WARN("lame: %i \n", _dubinspath.lame);
+        ROS_WARN_STREAM("q1: " << _dubinspath.q1);
+        ROS_WARN_STREAM("w1: " << _dubinspath.w1);
+        ROS_WARN_STREAM("w2: " << _dubinspath.w2);
+        ROS_WARN_STREAM("w3: " << _dubinspath.w3);
+        ROS_WARN_STREAM("q3: " << _dubinspath.q3);
+        ROS_WARN("R: %f \n", _dubinspath.R);
+        ROS_WARN("L: %f \n", _dubinspath.L);
     }
 }
 
