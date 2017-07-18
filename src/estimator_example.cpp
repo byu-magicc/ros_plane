@@ -67,8 +67,10 @@ void estimator_example::estimate(const params_s &params, const input_s &input, o
 
         float lpf_a = 50;
         float lpf_a1 = 8;
+        float lpf_a2 = 10;
         alpha = exp(-lpf_a*params.Ts);
         alpha1 = exp(-lpf_a1*params.Ts);
+        alpha2 = exp(-lpf_a2*params.Ts);
     }
 
     // low pass filter gyros to estimate angular rates
@@ -80,11 +82,28 @@ void estimator_example::estimate(const params_s &params, const input_s &input, o
     float qhat = lpf_gyro_y;
     float rhat = lpf_gyro_z;
 
-    // low pass filter static pressure sensor and invert to esimate altitude
+    // low pass filter static pressure sensor
     //lpf_static = alpha1*lpf_static + (1-alpha1)*input.static_pres;
-    //float hhat = lpf_static/params.rho/params.gravity;
-    // !!! normally we would low pass filter the static pressure but the NAZE already does that
-    float hhat = input.baro_alt;
+
+    // low pass filter the altitude estimate coming from the naze.
+    // Some gating is also implemented to throw out outlier measurements, but still allow for convergence if a sudden change in pressure is true.
+    float gate_gain = 5;
+
+    if(input.baro_alt > baro_alt + gate_gain)
+    {
+        baro_alt = baro_alt + gate_gain;
+    }
+    else if(input.baro_alt < baro_alt - gate_gain)
+    {
+        baro_alt = baro_alt - gate_gain;
+    }
+    else
+    {
+        baro_alt = input.baro_alt;
+    }
+
+    lpf_hhat = alpha2*lpf_hhat + (1-alpha2)*baro_alt;
+    float hhat = lpf_hhat;
 
     // low pass filter diff pressure sensor and invert to extimate Va
     lpf_diff = alpha1*lpf_diff + (1-alpha1)*input.diff_pres;
