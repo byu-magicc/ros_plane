@@ -96,3 +96,8 @@ delta_t0: 0.4
 
 # Truth
 wind_speed_topic: "gazebo/wind_speed"
+truthTopic: "truth"
+
+# Forces and Moments
+windSpeedTopic: "wind"
+commandTopic: "command"
