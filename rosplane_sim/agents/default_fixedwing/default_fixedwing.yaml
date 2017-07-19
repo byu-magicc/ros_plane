@@ -96,6 +96,3 @@ delta_t0: 0.4
 
 # Truth
 wind_speed_topic: "gazebo/wind_speed"
-
-# IMU
-update_rate: 500
