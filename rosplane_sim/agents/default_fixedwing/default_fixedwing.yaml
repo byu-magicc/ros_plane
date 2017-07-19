@@ -89,3 +89,13 @@ psi0: 0
 Va0: 16.38
 delta_e0: 0.02967 # 1.7 degrees
 delta_t0: 0.4
+
+# =============================
+# ======= Plugin Params =======
+# =============================
+
+# Truth
+wind_speed_topic: "gazebo/wind_speed"
+
+# IMU
+update_rate: 500
