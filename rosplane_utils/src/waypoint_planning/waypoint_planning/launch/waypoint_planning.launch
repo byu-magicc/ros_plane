@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+  <remap from="waypoint_path" to="fixedwing/waypoint_path"/>
+  <node name="waypoint" pkg="waypoint_planning" type="waypoint_planning" output="screen"/>
+</launch>
