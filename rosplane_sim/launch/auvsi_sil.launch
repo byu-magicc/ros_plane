@@ -1,0 +1,46 @@
+<!-- This is a launch file that runs the bare minimum requirements to get -->
+<!-- gazebo running for a fixed-wing aircraft -->
+
+<launch>
+  <arg name="mav_name"            default="fixedwing"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="false"/>
+    <arg name="gui" value="false"/>
+    <arg name="verbose" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+  <include file="$(find ros_groundstation)/launch/gs_fixedwing.launch"/>
+
+  <!-- Load Global Parameters for this MAV -->
+  <rosparam command="load" file="$(find rosplane_sim)/params/$(arg mav_name).yaml" ns="$(arg mav_name)"/>
+
+  <!-- Spawn MAV -->
+  <include file="$(find rosplane_sim)/launch/spawn_mav.launch">
+    <arg name="mav_name"            value="$(arg mav_name)" />
+    <arg name="model"               value="$(find rosplane_sim)/xacro/$(arg mav_name)_sil.xacro" />
+  </include>
+
+  <group ns="$(arg mav_name)">
+    <!-- ROS interface rosflight_io -->
+    <node name="rosflight_io" pkg="rosflight" type="rosflight_io" output="screen">
+      <param name="udp" value="true"/>
+    </node>
+
+    <node name="autopilot" pkg="rosplane" type="rosplane_controller" >
+      <remap from="state" to="truth"/>
+    </node>
+
+    <node name="estimator" pkg="rosplane" type="rosplane_estimator" output="screen"/>
+
+    <node name="pathfollower" pkg="rosplane" type="rosplane_path_follower">
+       <remap from="state" to="truth"/>
+    </node>
+
+    <node name="current_path_publisher" pkg="rostopic" type="rostopic"
+      args="pub current_path rosplane_msgs/Current_Path '0' '15.0'  '[0.0, 0.0, -100.0]'  '[1.0, 0.0, 0.0]'  '[0.0, 0.0, -100.0]'  '100.0' '1'"/>
+    <node name="auto_launch" pkg="auto_launch" type='auto_launch.py'>
+      <param name="delay" value="10"/>
+    </node>
+  </group>
+</launch>
