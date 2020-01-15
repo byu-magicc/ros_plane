@@ -37,10 +37,10 @@
        <remap from="state" to="truth"/>
     </node>
 
-    <node name="current_path_publisher" pkg="rostopic" type="rostopic"
-      args="pub current_path rosplane_msgs/Current_Path '0' '15.0'  '[0.0, 0.0, -100.0]'  '[1.0, 0.0, 0.0]'  '[0.0, 0.0, -100.0]'  '100.0' '1'"/>
-    <node name="auto_launch" pkg="auto_launch" type='auto_launch.py'>
-      <param name="delay" value="10"/>
+    <node name="path_manager" pkg="rosplane" type="rosplane_path_manager" output="screen"/>
+
+    <node name="auto_launch" pkg="auto_launch" type='auto_launch.py' output="screen">
+      <param name="delay" value="5"/>
     </node>
   </group>
 </launch>
