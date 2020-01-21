@@ -34,8 +34,8 @@ void path_manager_example::manage(const params_s &params, const input_s &input, 
     else
     {
       /** Switch the following for flying directly to waypoints, or filleting corners */
-      //manage_line(params, input, output);
-      manage_fillet(params, input, output);
+      manage_line(params, input, output);
+      //manage_fillet(params, input, output);
     }
   }
 }
