@@ -13,6 +13,7 @@
 #include <ros/ros.h>
 #include <rosplane_msgs/State.h>
 #include <rosplane_msgs/Current_Path.h>
+#include <rosplane_msgs/Extended_Path.h>
 #include <rosplane_msgs/Waypoint.h>
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/Float32.h>
@@ -60,6 +61,9 @@ protected:
     float c[3];             /** Center of orbital path (m) */
     float rho;              /** Radius of orbital path (m) */
     int8_t lambda;          /** Direction of orbital path (cw is 1, ccw is -1) */
+    float line_end[3];      /** End of straight line paths */
+    float orbit_start;      /** Start of orbit path, in rad */
+    float orbit_end;        /** End of orbit path, in rad */
   };
 
   struct params_s
@@ -76,6 +80,7 @@ private:
   ros::Subscriber vehicle_state_sub_;     /**< vehicle state subscription */
   ros::Subscriber new_waypoint_sub_;      /**< new waypoint subscription */
   ros::Publisher  current_path_pub_;      /**< controller commands publication */
+  ros::Publisher  extended_path_pub_;      /**< controller commands publication */
 
   struct params_s params_;
 

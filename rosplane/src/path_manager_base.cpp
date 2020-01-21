@@ -14,6 +14,7 @@ path_manager_base::path_manager_base():
   vehicle_state_sub_ = nh_.subscribe("state", 10, &path_manager_base::vehicle_state_callback, this);
   new_waypoint_sub_ = nh_.subscribe("waypoint_path", 10, &path_manager_base::new_waypoint_callback, this);
   current_path_pub_ = nh_.advertise<rosplane_msgs::Current_Path>("current_path", 10);
+  extended_path_pub_ = nh_.advertise<rosplane_msgs::Extended_Path>("extended_path", 10);
 
   update_timer_ = nh_.createTimer(ros::Duration(1.0/update_rate_), &path_manager_base::current_path_publish, this);
 
@@ -96,7 +97,16 @@ void path_manager_base::current_path_publish(const ros::TimerEvent &)
   current_path.rho = output.rho;
   current_path.lambda = output.lambda;
 
+  rosplane_msgs::Extended_Path extended_path;
+  extended_path.path = current_path;
+  extended_path.line_end[0] = output.line_end[0];
+  extended_path.line_end[1] = output.line_end[1];
+  extended_path.line_end[2] = output.line_end[2];
+  extended_path.orbit_start = output.orbit_start;
+  extended_path.orbit_end = output.orbit_end;
+
   current_path_pub_.publish(current_path);
+  extended_path_pub_.publish(extended_path);
 }
 
 } //end namespace
