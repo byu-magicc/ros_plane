@@ -1,6 +1,3 @@
-<!-- This is a launch file that runs the bare minimum requirements to get -->
-<!-- gazebo running for a fixed-wing aircraft -->
-
 <launch>
   <arg name="mav_name"            default="fixedwing"/>
 
@@ -10,7 +7,9 @@
     <arg name="verbose" value="false"/>
     <arg name="debug" value="false"/>
   </include>
-  <include file="$(find ros_groundstation)/launch/gs_fixedwing.launch"/>
+  <rosparam command="load" file="$(find ros_groundstation)/params/auvsi_sil_topics.yaml"/>
+  <node name="ground_station" pkg="ros_groundstation" type="ros_groundstation"/>
+
 
   <!-- Load Global Parameters for this MAV -->
   <rosparam command="load" file="$(find rosplane_sim)/params/$(arg mav_name).yaml" ns="$(arg mav_name)"/>
@@ -37,7 +36,9 @@
        <remap from="state" to="truth"/>
     </node>
 
-    <node name="path_manager" pkg="rosplane" type="rosplane_path_manager" output="screen"/>
+    <node name="path_manager" pkg="rosplane" type="rosplane_path_manager" output="screen">
+    	<remap from="state" to="truth"/>
+    </node>
 
     <node name="auto_launch" pkg="auto_launch" type='auto_launch.py' output="screen">
       <param name="delay" value="5"/>
