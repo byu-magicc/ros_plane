@@ -163,6 +163,8 @@ namespace rosplane
         output.rho = R_min;
         output.lambda = ((q_im1(0) * q_i(1) - q_im1(1) * q_i(0)) > 0 ? 1 : -1);
         z = w_i + q_i * (R_min / tanf(beta / 2.0));
+        output.orbit_start = atan2f(q_im1(1), q_im1(0));
+        output.orbit_end = atan2f(q_i(1), q_i(0));
         if ((p - z).dot(q_i) > 0)
         {
           if (idx_a_ == num_waypoints_ - 1)
