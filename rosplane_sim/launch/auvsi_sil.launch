@@ -8,7 +8,7 @@
     <arg name="debug" value="false"/>
   </include>
   <rosparam command="load" file="$(find ros_groundstation)/params/auvsi_sil_topics.yaml"/>
-  <node name="ground_station" pkg="ros_groundstation" type="ros_groundstation"/>
+  <node name="ground_station" pkg="ros_groundstation" type="ros_groundstation" output="screen" required="true"/>
 
 
   <!-- Load Global Parameters for this MAV -->
@@ -22,7 +22,7 @@
 
   <group ns="$(arg mav_name)">
     <!-- ROS interface rosflight_io -->
-    <node name="rosflight_io" pkg="rosflight" type="rosflight_io" output="screen">
+    <node name="rosflight_io" pkg="rosflight" type="rosflight_io" >
       <param name="udp" value="true"/>
     </node>
 
@@ -30,7 +30,7 @@
       <remap from="state" to="truth"/>
     </node>
 
-    <node name="estimator" pkg="rosplane" type="rosplane_estimator" output="screen"/>
+    <node name="estimator" pkg="rosplane" type="rosplane_estimator" />
 
     <node name="pathfollower" pkg="rosplane" type="rosplane_path_follower">
        <remap from="state" to="truth"/>
@@ -40,7 +40,7 @@
     	<remap from="state" to="truth"/>
     </node>
 
-    <node name="auto_launch" pkg="auto_launch" type='auto_launch.py' output="screen">
+    <node name="auto_launch" pkg="auto_launch" type='auto_launch.py' >
       <param name="delay" value="5"/>
     </node>
   </group>

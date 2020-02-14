@@ -9,6 +9,7 @@ namespace rosplane
   {
     fil_state_ = fillet_state::STRAIGHT;
     dub_state_ = dubin_state::FIRST;
+    current_path.end_plane.normal.setZero();
   }
 
   void path_manager_example::manage(const params_s &params, const input_s &input, output_s &output)
@@ -24,48 +25,115 @@ namespace rosplane
       output.c[2] = -50.0f;
       output.rho = params.R_min;
       output.lambda = 1;
+      output.orbit_start = 0;
+      output.orbit_end = 0;
     } else
     {
-      if (waypoints_[idx_a_].chi_valid)
+      int idx_z = (idx_a_ - 1 + num_waypoints_) % num_waypoints_;
+      int idx_b = (idx_a_ + 1) % num_waypoints_;
+      int idx_c = (idx_b + 1) % num_waypoints_;
+      current_path = generate_path(params, 0, idx_a_, idx_b, idx_c, subpath_index_);
+      Eigen::Vector3f p{input.pn, input.pe, -input.h};
+
+      while (has_passed_plane(p))
       {
-        manage_dubins(params, input, output);
-      } else
-      {
-        /** Switch the following for flying directly to waypoints, or filleting corners */
-        //manage_line(params, input, output);
-        manage_fillet(params, input, output);
+        if (++subpath_index_ >= current_path.num_paths)
+        {
+          subpath_index_ = 0;
+          idx_a_ = (++idx_a_) % num_waypoints_;
+        }
+        idx_b = (idx_a_ + 1) % num_waypoints_;
+        idx_c = (idx_b + 1) % num_waypoints_;
+        current_path = generate_path(params, idx_z, idx_a_, idx_b, idx_c, subpath_index_);
       }
+      output = current_path.output;
     }
   }
 
-  void path_manager_example::manage_line(const params_s &params, const input_s &input, output_s &output)
+  bool path_manager_example::has_passed_plane(Eigen::Vector3f &p, SemiPlane &semiplane)
   {
+    return ((p - semiplane.point).dot(semiplane.normal) > 0);
+  }
 
-    Eigen::Vector3f p;
-    p << input.pn, input.pe, -input.h;
+  bool path_manager_example::has_passed_plane(Eigen::Vector3f &p)
+  {
+    return has_passed_plane(p, current_path.end_plane);
+  }
 
-    int idx_b;
-    int idx_c;
-    if (idx_a_ == num_waypoints_ - 1)
+  path_manager_example::Path
+  path_manager_example::generate_path(const struct params_s &params, int idx_z, int idx_a, int idx_b, int idx_c,
+                                      int subpath_index)
+  {
+    if (waypoints_[idx_a_].chi_valid)
     {
-      idx_b = 0;
-      idx_c = 1;
-    } else if (idx_a_ == num_waypoints_ - 2)
-    {
-      idx_b = num_waypoints_ - 1;
-      idx_c = 0;
+      return generate_dubins_path(params, idx_a, idx_b, idx_c, subpath_index);
     } else
     {
-      idx_b = idx_a_ + 1;
-      idx_c = idx_b + 1;
+      if (params.do_fillets)
+        return generate_fillet_path(params, idx_z, idx_a, idx_b, idx_c, subpath_index);
+      else
+        return generate_line_path(params, idx_a, idx_b, idx_c);
     }
+  }
 
-    Eigen::Vector3f w_im1(waypoints_[idx_a_].w);
+  rosplane_msgs::Extended_Path path_manager_example::generate_path_message(const Path &path)
+  {
+    rosplane_msgs::Extended_Path path_msg;
+    rosplane_msgs::Current_Path &current_path_msg = path_msg.path;
+
+    current_path_msg.path_type = path.output.flag;
+    current_path_msg.Va_d = path.output.Va_d;
+    current_path_msg.r[0] = path.output.r[0];
+    current_path_msg.r[1] = path.output.r[1];
+    current_path_msg.r[2] = path.output.r[2];
+    current_path_msg.q[0] = path.output.q[0];
+    current_path_msg.q[1] = path.output.q[1];
+    current_path_msg.q[2] = path.output.q[2];
+    current_path_msg.c[0] = path.output.c[0];
+    current_path_msg.c[1] = path.output.c[1];
+    current_path_msg.c[2] = path.output.c[2];
+    current_path_msg.rho = path.output.rho;
+    current_path_msg.lambda = path.output.lambda;
+
+    path_msg.line_end[0] = path.output.line_end[0];
+    path_msg.line_end[1] = path.output.line_end[1];
+    path_msg.line_end[2] = path.output.line_end[2];
+
+    path_msg.orbit_start = path.output.orbit_start;
+    path_msg.orbit_end = path.output.orbit_end;
+
+    return path_msg;
+  }
+
+  rosplane_msgs::Full_Path path_manager_example::generate_full_path(const path_manager_base::params_s &params)
+  {
+    rosplane_msgs::Full_Path full_path;
+    full_path.label = "ROSplane Path Manager";
+    for (size_t idx_a = 0; idx_a < num_waypoints_; idx_a++)
+    {
+      size_t idx_b = (idx_a + 1) % num_waypoints_;
+      size_t idx_c = (idx_b + 1) % num_waypoints_;
+      Path path = generate_path(params, 0, idx_a, idx_b, idx_c, 0);
+      full_path.paths.push_back(generate_path_message(path));
+      for (size_t subpath_index{1}; subpath_index < path.num_paths; subpath_index++)
+        full_path.paths.push_back(generate_path_message(generate_path(params, 0, idx_a, idx_b, idx_c, subpath_index)));
+    }
+    return full_path;
+  }
+
+  path_manager_example::Path
+  path_manager_example::generate_line_path(const struct params_s &params, int idx_a, int idx_b, int idx_c)
+  {
+    Path path;
+
+    Eigen::Vector3f w_im1(waypoints_[idx_a].w);
     Eigen::Vector3f w_i(waypoints_[idx_b].w);
     Eigen::Vector3f w_ip1(waypoints_[idx_c].w);
 
+    output_s &output = path.output;
+
     output.flag = true;
-    output.Va_d = waypoints_[idx_a_].Va_d;
+    output.Va_d = waypoints_[idx_a].Va_d;
     output.r[0] = w_im1(0);
     output.r[1] = w_im1(1);
     output.r[2] = w_im1(2);
@@ -80,62 +148,50 @@ namespace rosplane
     output.line_end[2] = w_i(2);
 
     Eigen::Vector3f n_i = (q_im1 + q_i).normalized();
-    if ((p - w_i).dot(n_i) > 0.0f)
-    {
-      if (idx_a_ == num_waypoints_ - 1)
-        idx_a_ = 0;
-      else
-        idx_a_++;
-    }
+    path.end_plane.point = w_i;
+    path.end_plane.normal = n_i;
+    path.num_paths = 0;
 
+    return path;
   }
 
-  void path_manager_example::manage_fillet(const params_s &params, const input_s &input, output_s &output)
+  path_manager_example::Path
+  path_manager_example::generate_fillet_path(const struct params_s &params, int idx_z, int idx_a, int idx_b, int idx_c,
+                                             int path_index)
   {
     if (num_waypoints_ < 3) //since it fillets don't make sense between just two points
     {
-      manage_line(params, input, output);
-      return;
+      return generate_line_path(params, idx_a, idx_b, idx_c);
     }
 
-    Eigen::Vector3f p;
-    p << input.pn, input.pe, -input.h;
+    Path path;
+    output_s &output = path.output;
+    path.num_paths = 2;
 
-    int idx_b;
-    int idx_c;
-    if (idx_a_ == num_waypoints_ - 1)
-    {
-      idx_b = 0;
-      idx_c = 1;
-    } else if (idx_a_ == num_waypoints_ - 2)
-    {
-      idx_b = num_waypoints_ - 1;
-      idx_c = 0;
-    } else
-    {
-      idx_b = idx_a_ + 1;
-      idx_c = idx_b + 1;
-    }
-
-    Eigen::Vector3f w_im1(waypoints_[idx_a_].w);
+    Eigen::Vector3f waypoint_before_previous(waypoints_[idx_z].w);
+    Eigen::Vector3f w_im1(waypoints_[idx_a].w);
     Eigen::Vector3f w_i(waypoints_[idx_b].w);
     Eigen::Vector3f w_ip1(waypoints_[idx_c].w);
 
     float R_min = params.R_min;
 
-    output.Va_d = waypoints_[idx_a_].Va_d;
+    output.Va_d = waypoints_[idx_a].Va_d;
     output.r[0] = w_im1(0);
     output.r[1] = w_im1(1);
     output.r[2] = w_im1(2);
+    Eigen::Vector3f q_prev = (w_im1 - waypoint_before_previous).normalized();
     Eigen::Vector3f q_im1 = (w_i - w_im1).normalized();
     Eigen::Vector3f q_i = (w_ip1 - w_i).normalized();
     float beta = acosf(-q_im1.dot(q_i));
+    float beta_prev = acosf(-q_prev.dot(q_im1));
+    Eigen::Vector3f line_start;
 
     Eigen::Vector3f z;
-    switch (fil_state_)
+    switch (path_index)
     {
-      case fillet_state::STRAIGHT:
+      case 0:
         output.flag = true;
+        line_start = w_im1 + q_im1 * (R_min / tanf(beta_prev / 2.0));
         output.q[0] = q_im1(0);
         output.q[1] = q_im1(1);
         output.q[2] = q_im1(2);
@@ -148,10 +204,18 @@ namespace rosplane
         output.line_end[0] = z(0);
         output.line_end[1] = z(1);
         output.line_end[2] = z(2);
-        if ((p - z).dot(q_im1) > 0)
-          fil_state_ = fillet_state::ORBIT;
+	if(!line_start.hasNaN() && line_start.allFinite() && (R_min / tanf(beta_prev / 2.0)) < (w_im1 - z).norm())
+	{
+          output.r[0] = line_start(0);
+          output.r[1] = line_start(1);
+          output.r[2] = line_start(2);
+	}
+
+        path.end_plane.point = z;
+        path.end_plane.normal = q_im1;
+        path.num_paths = 2;
         break;
-      case fillet_state::ORBIT:
+      case 1:
         output.flag = false;
         output.q[0] = q_i(0);
         output.q[1] = q_i(1);
@@ -165,24 +229,23 @@ namespace rosplane
         z = w_i + q_i * (R_min / tanf(beta / 2.0));
         output.orbit_start = atan2f(q_im1(1), q_im1(0));
         output.orbit_end = atan2f(q_i(1), q_i(0));
-        if ((p - z).dot(q_i) > 0)
-        {
-          if (idx_a_ == num_waypoints_ - 1)
-            idx_a_ = 0;
-          else
-            idx_a_++;
-          fil_state_ = fillet_state::STRAIGHT;
-        }
+
+        path.end_plane.point = z;
+        path.end_plane.normal = q_i;
+        path.num_paths = 2;
         break;
     }
+    return path;
   }
 
-  void path_manager_example::manage_dubins(const params_s &params, const input_s &input, output_s &output)
+  path_manager_example::Path
+  path_manager_example::generate_dubins_path(const struct params_s &params, int idx_a, int idx_b, int idx_c,
+                                             int path_index)
   {
-    Eigen::Vector3f p;
-    p << input.pn, input.pe, -input.h;
-
-    output.Va_d = waypoints_[idx_a_].Va_d;
+    Path path;
+    output_s &output = path.output;
+    path.num_paths = static_cast<int>(dubin_state::BEFORE_H3) + 1;
+    output.Va_d = waypoints_[idx_a].Va_d;
     output.r[0] = 0;
     output.r[1] = 0;
     output.r[2] = 0;
@@ -193,23 +256,32 @@ namespace rosplane
     output.c[1] = 0;
     output.c[2] = 0;
 
+    SemiPlane H1{
+        dubinspath_.w1,
+        dubinspath_.q1
+    };
+    SemiPlane H2{
+        dubinspath_.w2,
+        dubinspath_.q1
+    };
+    SemiPlane H3{
+        dubinspath_.w3,
+        dubinspath_.q3
+    };
+
     switch (dub_state_)
     {
       case dubin_state::FIRST:
         dubinsParameters(waypoints_[0], waypoints_[1], params.R_min);
+        // break intentionally omitted
+      case dubin_state::BEFORE_H1_WRONG_SIDE:
         output.flag = false;
         output.c[0] = dubinspath_.cs(0);
         output.c[1] = dubinspath_.cs(1);
         output.c[2] = dubinspath_.cs(2);
         output.rho = dubinspath_.R;
         output.lambda = dubinspath_.lams;
-        if ((p - dubinspath_.w1).dot(dubinspath_.q1) >= 0) // start in H1
-        {
-          dub_state_ = dubin_state::BEFORE_H1_WRONG_SIDE;
-        } else
-        {
-          dub_state_ = dubin_state::BEFORE_H1;
-        }
+        path.end_plane = -H1;
         break;
       case dubin_state::BEFORE_H1:
         output.flag = false;
@@ -218,84 +290,19 @@ namespace rosplane
         output.c[2] = dubinspath_.cs(2);
         output.rho = dubinspath_.R;
         output.lambda = dubinspath_.lams;
-        if ((p - dubinspath_.w1).dot(dubinspath_.q1) >= 0) // entering H1
-        {
-          dub_state_ = dubin_state::STRAIGHT;
-        }
-        break;
-      case dubin_state::BEFORE_H1_WRONG_SIDE:
-        output.flag = false;
-        output.c[0] = dubinspath_.cs(0);
-        output.c[1] = dubinspath_.cs(1);
-        output.c[2] = dubinspath_.cs(2);
-        output.rho = dubinspath_.R;
-        output.lambda = dubinspath_.lams;
-        if ((p - dubinspath_.w1).dot(dubinspath_.q1) < 0) // exit H1
-        {
-          dub_state_ = dubin_state::BEFORE_H1;
-        }
+        path.end_plane = H1;
         break;
       case dubin_state::STRAIGHT:
         output.flag = true;
         output.r[0] = dubinspath_.w1(0);
         output.r[1] = dubinspath_.w1(1);
         output.r[2] = dubinspath_.w1(2);
-        // output.r[0] = dubinspath_.z1(0);
-        // output.r[1] = dubinspath_.z1(1);
-        // output.r[2] = dubinspath_.z1(2);
         output.q[0] = dubinspath_.q1(0);
         output.q[1] = dubinspath_.q1(1);
         output.q[2] = dubinspath_.q1(2);
         output.rho = 1;
         output.lambda = 1;
-        if ((p - dubinspath_.w2).dot(dubinspath_.q1) >= 0) // entering H2
-        {
-          if ((p - dubinspath_.w3).dot(dubinspath_.q3) >= 0) // start in H3
-          {
-            dub_state_ = dubin_state::BEFORE_H3_WRONG_SIDE;
-          } else
-          {
-            dub_state_ = dubin_state::BEFORE_H3;
-          }
-        }
-        break;
-      case dubin_state::BEFORE_H3:
-        output.flag = false;
-        output.c[0] = dubinspath_.ce(0);
-        output.c[1] = dubinspath_.ce(1);
-        output.c[2] = dubinspath_.ce(2);
-        output.rho = dubinspath_.R;
-        output.lambda = dubinspath_.lame;
-        if ((p - dubinspath_.w3).dot(dubinspath_.q3) >= 0) // entering H3
-        {
-          // increase the waypoint pointer
-          int idx_b;
-          if (idx_a_ == num_waypoints_ - 1)
-          {
-            idx_a_ = 0;
-            idx_b = 1;
-          } else if (idx_a_ == num_waypoints_ - 2)
-          {
-            idx_a_++;
-            idx_b = 0;
-          } else
-          {
-            idx_a_++;
-            idx_b = idx_a_ + 1;
-          }
-
-          // plan new Dubin's path to next waypoint configuration
-          dubinsParameters(waypoints_[idx_a_], waypoints_[idx_b], params.R_min);
-
-          //start new path
-          if ((p - dubinspath_.w1).dot(dubinspath_.q1) >= 0) // start in H1
-          {
-            dub_state_ = dubin_state::BEFORE_H1_WRONG_SIDE;
-          } else
-          {
-            dub_state_ = dubin_state::BEFORE_H1;
-          }
-        }
+        path.end_plane = H2;
         break;
       case dubin_state::BEFORE_H3_WRONG_SIDE:
         output.flag = false;
@@ -304,10 +311,16 @@ namespace rosplane
         output.c[2] = dubinspath_.ce(2);
         output.rho = dubinspath_.R;
         output.lambda = dubinspath_.lame;
-        if ((p - dubinspath_.w3).dot(dubinspath_.q3) < 0) // exit H3
-        {
-          dub_state_ = dubin_state::BEFORE_H1;
-        }
+        path.end_plane = -H3;
+        break;
+      case dubin_state::BEFORE_H3:
+        output.flag = false;
+        output.c[0] = dubinspath_.ce(0);
+        output.c[1] = dubinspath_.ce(1);
+        output.c[2] = dubinspath_.ce(2);
+        output.rho = dubinspath_.R;
+        output.lambda = dubinspath_.lame;
+        path.end_plane = H3;
         break;
     }
   }

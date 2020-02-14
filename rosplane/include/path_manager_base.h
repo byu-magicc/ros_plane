@@ -14,6 +14,7 @@
 #include <rosplane_msgs/State.h>
 #include <rosplane_msgs/Current_Path.h>
 #include <rosplane_msgs/Extended_Path.h>
+#include <rosplane_msgs/Full_Path.h>
 #include <rosplane_msgs/Waypoint.h>
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/Float32.h>
@@ -69,9 +70,11 @@ protected:
   struct params_s
   {
     double R_min;
+    bool do_fillets{true};
   };
 
   virtual void manage(const struct params_s &params, const struct input_s &input, struct output_s &output) = 0;
+  virtual rosplane_msgs::Full_Path generate_full_path(const params_s &params) = 0;
 
 private:
 
@@ -81,6 +84,7 @@ private:
   ros::Subscriber new_waypoint_sub_;      /**< new waypoint subscription */
   ros::Publisher  current_path_pub_;      /**< controller commands publication */
   ros::Publisher  extended_path_pub_;      /**< controller commands publication */
+  ros::Publisher full_path_pub_;
 
   struct params_s params_;
 
@@ -93,6 +97,7 @@ private:
   bool state_init_;
   void new_waypoint_callback(const rosplane_msgs::Waypoint &msg);
   void current_path_publish(const ros::TimerEvent &);
+  void full_path_publish();
 };
 } //end namespace
 #endif // PATH_MANAGER_BASE_H
