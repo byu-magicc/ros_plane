@@ -26,7 +26,7 @@ namespace rosplane
       output.rho = params.R_min;
       output.lambda = 1;
       output.orbit_start = 0;
-      output.orbit_end = 0;
+      output.orbit_end = 1.9999*M_PI;
     } else
     {
       int idx_z = (idx_a_ - 1 + num_waypoints_) % num_waypoints_;
@@ -184,14 +184,12 @@ namespace rosplane
     Eigen::Vector3f q_i = (w_ip1 - w_i).normalized();
     float beta = acosf(-q_im1.dot(q_i));
     float beta_prev = acosf(-q_prev.dot(q_im1));
-    Eigen::Vector3f line_start;
 
     Eigen::Vector3f z;
     switch (path_index)
     {
       case 0:
         output.flag = true;
-        line_start = w_im1 + q_im1 * (R_min / tanf(beta_prev / 2.0));
         output.q[0] = q_im1(0);
         output.q[1] = q_im1(1);
         output.q[2] = q_im1(2);
@@ -200,17 +198,10 @@ namespace rosplane
         output.c[2] = 1;
         output.rho = 1;
         output.lambda = 1;
-        z = w_i - q_im1 * (R_min / tanf(beta / 2.0));
+        z = w_i - q_im1 * R_min / tanf(beta / 2.);
         output.line_end[0] = z(0);
         output.line_end[1] = z(1);
         output.line_end[2] = z(2);
-	if(!line_start.hasNaN() && line_start.allFinite() && (R_min / tanf(beta_prev / 2.0)) < (w_im1 - z).norm())
-	{
-          output.r[0] = line_start(0);
-          output.r[1] = line_start(1);
-          output.r[2] = line_start(2);
-	}
-
         path.end_plane.point = z;
         path.end_plane.normal = q_im1;
         path.num_paths = 2;
