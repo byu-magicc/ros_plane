@@ -123,3 +123,5 @@ sonar_max_range: 8.0
 airspeed_stdev: 1.15
 airspeed_bias_range: 0.15
 airspeed_bias_walk_stdev: 0.001
+R_min: 25.0
+update_rate: 10

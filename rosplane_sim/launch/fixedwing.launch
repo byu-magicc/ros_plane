@@ -15,6 +15,10 @@
   <include file="$(find rosplane_sim)/launch/spawn_mav.launch">
     <arg name="mav_name"            value="$(arg mav_name)" />
     <arg name="model"               value="$(find rosplane_sim)/xacro/$(arg mav_name).xacro" />
+    <arg name="x"                   value="-40.0"/> 
+    <arg name="y"                   value="0.0"/>
+    <!-- <arg name="z"                   value="20"/> -->
+    <!-- <arg name="yaw"                 value="-0.765049"/> -->
   </include>
 
   <group ns="$(arg mav_name)">
