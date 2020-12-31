@@ -155,7 +155,7 @@ void controller_base::actuator_controls_publish(const ros::TimerEvent&) {
         actuators.z = output.delta_r;  //(isfinite(output.delta_r)) ? output.delta_r : 0.0f;
         actuators.F = output.delta_t;  //(isfinite(output.delta_t)) ? output.delta_t : 0.0f;
 
-        ROS_ERROR("%f %f %f %f\n", actuators.x, actuators.y, actuators.z, actuators.F);
+        // ROS_ERROR("%f %f %f %f\n", actuators.x, actuators.y, actuators.z, actuators.F);
 
         actuators_pub_.publish(actuators);
         trajectory_pub_.publish(path_);
