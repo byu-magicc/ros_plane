@@ -3,37 +3,13 @@
 #include <visualization_msgs/MarkerArray.h>
 
 #define num_waypoints 33  // kept 8 initially
-visualization_msgs::Marker visualize_markers(float x, float y, float z) {
-    visualization_msgs::Marker marker;
-    marker.type = visualization_msgs::Marker::POINTS;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = x;
-    marker.pose.position.y = y;
-    marker.pose.position.z = z;
-    marker.pose.orientation.x = 0.0;
-    marker.pose.orientation.y = 0.0;
-    marker.pose.orientation.z = 0.0;
-    marker.pose.orientation.w = 1.0;
-    marker.pose.orientation.x = 0.0;
-    marker.pose.orientation.y = 0.0;
-    marker.pose.orientation.z = 0.0;
-    marker.pose.orientation.w = 1.0;
-    marker.scale.x = 5;
-    marker.scale.y = 5;
-    marker.scale.z = 0.1;
-    marker.color.a = 1.0;  // Don't forget to set the alpha!
-    marker.color.r = 0.0;
-    marker.color.g = 0.0;
-    marker.color.b = 1.0;
-    return marker;
-}
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "rosplane_simple_path_planner");
 
     ros::NodeHandle nh_;
     ros::Publisher waypointPublisher = nh_.advertise<rosplane_msgs::Waypoint>("waypoint_path", 10);
-    ros::Publisher visualize_points_pub = nh_.advertise<visualization_msgs::MarkerArray>("visualize_points", 10);
+    ros::Publisher visualize_points_pub = nh_.advertise<visualization_msgs::Marker>("visualize_points", 10);
 
     double start_x, left_y, right_y, r, height;
     double hunter_killer_x, hunter_killer_y;
@@ -124,8 +100,29 @@ int main(int argc, char** argv) {
     //     // 180 * M_PI / 180,
     //     // Va,
     // };
-    visualization_msgs::MarkerArray markers;
     visualization_msgs::Marker marker;
+    marker.type = visualization_msgs::Marker::POINTS;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.header.frame_id = "base_link";
+    marker.pose.position.x = 0;
+    marker.pose.position.y = 0;
+    marker.pose.position.z = 0;
+    marker.pose.orientation.x = 0.0;
+    marker.pose.orientation.y = 0.0;
+    marker.pose.orientation.z = 0.0;
+    marker.pose.orientation.w = 1.0;
+    marker.pose.orientation.x = 0.0;
+    marker.pose.orientation.y = 0.0;
+    marker.pose.orientation.z = 0.0;
+    marker.pose.orientation.w = 1.0;
+    marker.scale.x = 1;
+    marker.scale.y = 1;
+    marker.scale.z = 0.1;
+    marker.color.a = 1.0;  // Don't forget to set the alpha!
+    marker.color.r = 0.0;
+    marker.color.g = 0.0;
+    marker.color.b = 1.0;
+    marker.lifetime = ros::Duration(0);
 
     int i = 0;
     for (int j = 0; j < (num_waypoints - 1) / 4; j++) {
@@ -135,32 +132,44 @@ int main(int argc, char** argv) {
             wps[20 * i + 2] = height;
             wps[20 * i + 3] = -tangency_angle_;
             wps[20 * i + 4] = Va;
-            marker = visualize_markers(wps[20 * i], wps[20 * i + 1], wps[20 * i + 2]);
-            markers.markers.push_back(marker);
+            geometry_msgs::Point p;
+            p.x = wps[20 * i];
+            p.y = wps[20 * i + 1];
+            p.z = -wps[20 * i + 2];
+            marker.points.push_back(p);
         } else {
             wps[20 * i] = r;
             wps[20 * i + 1] = left_y;
             wps[20 * i + 2] = height;
             wps[20 * i + 3] = -M_PI / 2;
             wps[20 * i + 4] = Va;
-            marker = visualize_markers(wps[20 * i], wps[20 * i + 1], wps[20 * i + 2]);
-            markers.markers.push_back(marker);
+            geometry_msgs::Point p;
+            p.x = wps[20 * i];
+            p.y = wps[20 * i + 1];
+            p.z = -wps[20 * i + 2];
+            marker.points.push_back(p);
         }
         wps[20 * i + 5] = r;
         wps[20 * i + 6] = right_y;
         wps[20 * i + 7] = height;
         wps[20 * i + 8] = -M_PI / 2;
         wps[20 * i + 9] = Va;
-        marker = visualize_markers(wps[20 * i + 5], wps[20 * i + 6], wps[20 * i + 7]);
-        markers.markers.push_back(marker);
+        geometry_msgs::Point p;
+        p.x = wps[20 * i + 5];
+        p.y = wps[20 * i + 6];
+        p.z = -wps[20 * i + 7];
+        marker.points.push_back(p);
 
         wps[20 * i + 10] = -r;
         wps[20 * i + 11] = right_y;
         wps[20 * i + 12] = height;
         wps[20 * i + 13] = M_PI / 2;
         wps[20 * i + 14] = Va;
-        marker = visualize_markers(wps[20 * i + 10], wps[20 * i + 11], wps[20 * i + 12]);
-        markers.markers.push_back(marker);
+        // geometry_msgs::Point p;
+        p.x = wps[20 * i + 10];
+        p.y = wps[20 * i + 11];
+        p.z = -wps[20 * i + 12];
+        marker.points.push_back(p);
 
         if (j == (num_waypoints - 5) / 4) {
             wps[20 * i + 15] = loop_exit_point_x;
@@ -168,16 +177,22 @@ int main(int argc, char** argv) {
             wps[20 * i + 17] = height;
             wps[20 * i + 18] = tangency_angle_;
             wps[20 * i + 19] = Va;
-            marker = visualize_markers(wps[20 * i + 15], wps[20 * i + 16], wps[20 * i + 17]);
-            markers.markers.push_back(marker);
+            geometry_msgs::Point p;
+            p.x = wps[20 * i + 15];
+            p.y = wps[20 * i + 16];
+            p.z = -wps[20 * i + 17];
+            marker.points.push_back(p);
         } else {
             wps[20 * i + 15] = -r;
             wps[20 * i + 16] = left_y;
             wps[20 * i + 17] = height;
             wps[20 * i + 18] = M_PI / 2;
             wps[20 * i + 19] = Va;
-            marker = visualize_markers(wps[20 * i + 15], wps[20 * i + 16], wps[20 * i + 17]);
-            markers.markers.push_back(marker);
+            geometry_msgs::Point p;
+            p.x = wps[20 * i + 15];
+            p.y = wps[20 * i + 16];
+            p.z = -wps[20 * i + 17];
+            marker.points.push_back(p);
         }
 
         i++;
@@ -187,8 +202,11 @@ int main(int argc, char** argv) {
     wps[20 * i + 2] = height;
     wps[20 * i + 3] = tangency_angle_;
     wps[20 * i + 4] = Va;
-    marker = visualize_markers(wps[20 * i], wps[20 * i + 1], wps[20 * i + 2]);
-    markers.markers.push_back(marker);
+    geometry_msgs::Point p;
+    p.x = wps[20 * i];
+    p.y = wps[20 * i + 1];
+    p.z = -wps[20 * i + 2];
+    marker.points.push_back(p);
 
     for (int i(0); i < num_waypoints; i++) {
         ros::Duration(0.5).sleep();
@@ -209,9 +227,13 @@ int main(int argc, char** argv) {
         new_waypoint.clear_wp_list = false;
 
         waypointPublisher.publish(new_waypoint);
-        visualize_points_pub.publish(markers);
     }
     ros::Duration(1.5).sleep();
+
+    while(ros::ok()) {
+        visualize_points_pub.publish(marker);
+        ros::Duration(0.5).sleep();
+    }
 
     return 0;
 }
