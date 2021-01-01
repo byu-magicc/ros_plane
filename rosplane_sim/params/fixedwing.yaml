@@ -123,7 +123,7 @@ sonar_max_range: 8.0
 airspeed_stdev: 1.15
 airspeed_bias_range: 0.15
 airspeed_bias_walk_stdev: 0.001
-R_min: 25.0
+R_min: 15.0
 launch_position_x: -40.0
 left_pylon_y: 48.66
 right_pylon_y: 108.66 # Kept it different from 408.66 (i.e. the actual position of the right pylon) just for testing.

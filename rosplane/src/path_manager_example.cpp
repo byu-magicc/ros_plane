@@ -67,8 +67,11 @@ void path_manager_example::manage_line(const params_s& params, const input_s& in
     if ((p - w_i).dot(n_i) > 0.0f) {
         if (idx_a_ == num_waypoints_ - 1)
             idx_a_ = 0;
-        else
+        else {
             idx_a_++;
+            ROS_INFO("manage_line idx_a_ %d", idx_a_);
+        }
+        // idx_a_++;
     }
 }
 
@@ -140,8 +143,11 @@ void path_manager_example::manage_fillet(const params_s& params, const input_s& 
             if ((p - z).dot(q_i) > 0) {
                 if (idx_a_ == num_waypoints_ - 1)
                     idx_a_ = 0;
-                else
+                else {
                     idx_a_++;
+                    ROS_INFO("manage_fillet idx_a_ %d", idx_a_);
+                }
+                // idx_a_++;
                 fil_state_ = fillet_state::STRAIGHT;
             }
             break;
@@ -242,9 +248,11 @@ void path_manager_example::manage_dubins(const params_s& params, const input_s& 
                     idx_b = 1;
                 } else if (idx_a_ == num_waypoints_ - 2) {
                     idx_a_++;
+                    ROS_INFO("manage_dubins idx_a_ %d", idx_a_);
                     idx_b = 0;
                 } else {
                     idx_a_++;
+                    ROS_INFO("manage_dubins idx_a_ %d", idx_a_);
                     idx_b = idx_a_ + 1;
                 }
 
@@ -296,147 +304,147 @@ float path_manager_example::mo(float in) {
 void path_manager_example::dubinsParameters(const waypoint_s start_node, const waypoint_s end_node, float R) {
     float ell =
         sqrtf((start_node.w[0] - end_node.w[0]) * (start_node.w[0] - end_node.w[0]) + (start_node.w[1] - end_node.w[1]) * (start_node.w[1] - end_node.w[1]));
-    // if (ell < 2.0 * R) {
-    //     ROS_ERROR("The distance between nodes must be larger than 2R.");
-    // } else {
-    static int loop_num = 0;
-    dubinspath_.ps(0) = start_node.w[0];
-    dubinspath_.ps(1) = start_node.w[1];
-    dubinspath_.ps(2) = start_node.w[2];
-    // added the next if-else condition for experimentation
-    // if (loop_num % 2 == 0) {
-    // dubinspath_.chis = 0.0;
-    // dubinspath_.chie = M_PI_F;
-    // } else {
-    //     dubinspath_.chis = M_PI_F;
-    //     dubinspath_.chie = 0.0;
-    // }
-    dubinspath_.chis = start_node.chi_d;
-    dubinspath_.pe(0) = end_node.w[0];
-    dubinspath_.pe(1) = end_node.w[1];
-    dubinspath_.pe(2) = end_node.w[2];
-    dubinspath_.chie = end_node.chi_d;
+    if (ell < 2.0 * R) {
+        ROS_ERROR("The distance between nodes must be larger than 2R.");
+    } else {
+        static int loop_num = 0;
+        dubinspath_.ps(0) = start_node.w[0];
+        dubinspath_.ps(1) = start_node.w[1];
+        dubinspath_.ps(2) = start_node.w[2];
+        // added the next if-else condition for experimentation
+        // if (loop_num % 2 == 0) {
+        // dubinspath_.chis = 0.0;
+        // dubinspath_.chie = M_PI_F;
+        // } else {
+        //     dubinspath_.chis = M_PI_F;
+        //     dubinspath_.chie = 0.0;
+        // }
+        dubinspath_.chis = start_node.chi_d;
+        dubinspath_.pe(0) = end_node.w[0];
+        dubinspath_.pe(1) = end_node.w[1];
+        dubinspath_.pe(2) = end_node.w[2];
+        dubinspath_.chie = end_node.chi_d;
 
-    Eigen::Vector3f crs = dubinspath_.ps;
-    crs(0) += R * (cosf(M_PI_2_F) * cosf(dubinspath_.chis) - sinf(M_PI_2_F) * sinf(dubinspath_.chis));
-    crs(1) += R * (sinf(M_PI_2_F) * cosf(dubinspath_.chis) + cosf(M_PI_2_F) * sinf(dubinspath_.chis));
-    Eigen::Vector3f cls = dubinspath_.ps;
-    cls(0) += R * (cosf(-M_PI_2_F) * cosf(dubinspath_.chis) - sinf(-M_PI_2_F) * sinf(dubinspath_.chis));
-    cls(1) += R * (sinf(-M_PI_2_F) * cosf(dubinspath_.chis) + cosf(-M_PI_2_F) * sinf(dubinspath_.chis));
-    Eigen::Vector3f cre = dubinspath_.pe;
-    cre(0) += R * (cosf(M_PI_2_F) * cosf(dubinspath_.chie) - sinf(M_PI_2_F) * sinf(dubinspath_.chie));
-    cre(1) += R * (sinf(M_PI_2_F) * cosf(dubinspath_.chie) + cosf(M_PI_2_F) * sinf(dubinspath_.chie));
-    Eigen::Vector3f cle = dubinspath_.pe;
-    cle(0) += R * (cosf(-M_PI_2_F) * cosf(dubinspath_.chie) - sinf(-M_PI_2_F) * sinf(dubinspath_.chie));
-    cle(1) += R * (sinf(-M_PI_2_F) * cosf(dubinspath_.chie) + cosf(-M_PI_2_F) * sinf(dubinspath_.chie));
+        Eigen::Vector3f crs = dubinspath_.ps;
+        crs(0) += R * (cosf(M_PI_2_F) * cosf(dubinspath_.chis) - sinf(M_PI_2_F) * sinf(dubinspath_.chis));
+        crs(1) += R * (sinf(M_PI_2_F) * cosf(dubinspath_.chis) + cosf(M_PI_2_F) * sinf(dubinspath_.chis));
+        Eigen::Vector3f cls = dubinspath_.ps;
+        cls(0) += R * (cosf(-M_PI_2_F) * cosf(dubinspath_.chis) - sinf(-M_PI_2_F) * sinf(dubinspath_.chis));
+        cls(1) += R * (sinf(-M_PI_2_F) * cosf(dubinspath_.chis) + cosf(-M_PI_2_F) * sinf(dubinspath_.chis));
+        Eigen::Vector3f cre = dubinspath_.pe;
+        cre(0) += R * (cosf(M_PI_2_F) * cosf(dubinspath_.chie) - sinf(M_PI_2_F) * sinf(dubinspath_.chie));
+        cre(1) += R * (sinf(M_PI_2_F) * cosf(dubinspath_.chie) + cosf(M_PI_2_F) * sinf(dubinspath_.chie));
+        Eigen::Vector3f cle = dubinspath_.pe;
+        cle(0) += R * (cosf(-M_PI_2_F) * cosf(dubinspath_.chie) - sinf(-M_PI_2_F) * sinf(dubinspath_.chie));
+        cle(1) += R * (sinf(-M_PI_2_F) * cosf(dubinspath_.chie) + cosf(-M_PI_2_F) * sinf(dubinspath_.chie));
 
-    float theta, theta2;
-    // compute L1
-    theta = atan2f(cre(1) - crs(1), cre(0) - crs(0));
-    float L1 = (crs - cre).norm() + R * mo(2.0 * M_PI_F + mo(theta - M_PI_2_F) - mo(dubinspath_.chis - M_PI_2_F)) +
-               R * mo(2.0 * M_PI_F + mo(dubinspath_.chie - M_PI_2_F) - mo(theta - M_PI_2_F));
-    ROS_INFO("value of theta in calculation of L1 is %f\n", theta);
-    // compute L2
-    ell = (cle - crs).norm();
-    theta = atan2f(cle(1) - crs(1), cle(0) - crs(0));
-    float L2;
-    // if (2.0 * R > ell)
-    //     L2 = 9999.0f;
-    // else {
-    theta2 = theta - M_PI_2_F + asinf(2.0 * R / ell);
-    L2 = sqrtf(ell * ell - 4.0 * R * R) + R * mo(2.0 * M_PI_F + mo(theta2) - mo(dubinspath_.chis - M_PI_2_F)) +
-         R * mo(2.0 * M_PI_F + mo(theta2 + M_PI_F) - mo(dubinspath_.chie + M_PI_2_F));
-    // }
-    ROS_INFO("value of theta and theta2 in calculation of L2 are %f and %f\n", theta, theta2);
-    // compute L3
-    ell = (cre - cls).norm();
-    theta = atan2f(cre(1) - cls(1), cre(0) - cls(0));
-    float L3;
-    // if (2.0 * R > ell)
-    //     L3 = 9999.0f;
-    // else {
-    theta2 = acosf(2.0 * R / ell);
-    L3 = sqrtf(ell * ell - 4 * R * R) + R * mo(2.0 * M_PI_F + mo(dubinspath_.chis + M_PI_2_F) - mo(theta + theta2)) +
-         R * mo(2.0 * M_PI_F + mo(dubinspath_.chie - M_PI_2_F) - mo(theta + theta2 - M_PI_F));
-    // }
-    ROS_INFO("value of theta and theta2 in calculation of L3 are %f and %f\n", theta, theta2);
-    // compute L4
-    theta = atan2f(cle(1) - cls(1), cle(0) - cls(0));
-    float L4 = (cls - cle).norm() + R * mo(2.0 * M_PI_F + mo(dubinspath_.chis + M_PI_2_F) - mo(theta + M_PI_2_F)) +
-               R * mo(2.0 * M_PI_F + mo(theta + M_PI_2_F) - mo(dubinspath_.chie + M_PI_2_F));
-    ROS_INFO("value of theta in calculation of L4 is %f\n", theta);
-    // L is the minimum distance
-    int idx = 1;
-    dubinspath_.L = L1;
-    if (L2 < dubinspath_.L) {
-        dubinspath_.L = L2;
-        idx = 2;
-    }
-    if (L3 < dubinspath_.L) {
-        dubinspath_.L = L3;
-        idx = 3;
-    }
-    if (L4 < dubinspath_.L) {
-        dubinspath_.L = L4;
-        idx = 4;
-    }
-    ROS_INFO("Value of chi_d of start_node and end_node,i.e. chi_s and chi_e respectively are %f and %f\n", start_node.chi_d, end_node.chi_d);
-    ROS_INFO("L1, L2, L3,L4 and L_min are %f, %f, %f, %f and %f respectively", L1, L2, L3, L4, dubinspath_.L);
-
-    Eigen::Vector3f e1;
-    //        e1.zero();
-    e1(0) = 1;
-    e1(1) = 0;
-    e1(2) = 0;
-    switch (idx) {
-        case 1:
-            dubinspath_.cs = crs;
-            dubinspath_.lams = 1;
-            dubinspath_.ce = cre;
-            dubinspath_.lame = 1;
-            dubinspath_.q1 = (cre - crs).normalized();
-            dubinspath_.w1 = dubinspath_.cs + (rotz(-M_PI_2_F) * dubinspath_.q1) * R;
-            dubinspath_.w2 = dubinspath_.ce + (rotz(-M_PI_2_F) * dubinspath_.q1) * R;
-            break;
-        case 2:
-            dubinspath_.cs = crs;
-            dubinspath_.lams = 1;
-            dubinspath_.ce = cle;
-            dubinspath_.lame = -1;
-            ell = (cle - crs).norm();
-            theta = atan2f(cle(1) - crs(1), cle(0) - crs(0));
+        float theta, theta2;
+        // compute L1
+        theta = atan2f(cre(1) - crs(1), cre(0) - crs(0));
+        float L1 = (crs - cre).norm() + R * mo(2.0 * M_PI_F + mo(theta - M_PI_2_F) - mo(dubinspath_.chis - M_PI_2_F)) +
+                   R * mo(2.0 * M_PI_F + mo(dubinspath_.chie - M_PI_2_F) - mo(theta - M_PI_2_F));
+        ROS_INFO("value of theta in calculation of L1 is %f\n", theta);
+        // compute L2
+        ell = (cle - crs).norm();
+        theta = atan2f(cle(1) - crs(1), cle(0) - crs(0));
+        float L2;
+        if (2.0 * R > ell)
+            L2 = 9999.0f;
+        else {
             theta2 = theta - M_PI_2_F + asinf(2.0 * R / ell);
-            dubinspath_.q1 = rotz(theta2 + M_PI_2_F) * e1;
-            dubinspath_.w1 = dubinspath_.cs + (rotz(theta2) * e1) * R;
-            dubinspath_.w2 = dubinspath_.ce + (rotz(theta2 + M_PI_F) * e1) * R;
-            break;
-        case 3:
-            dubinspath_.cs = cls;
-            dubinspath_.lams = -1;
-            dubinspath_.ce = cre;
-            dubinspath_.lame = 1;
-            ell = (cre - cls).norm();
-            theta = atan2f(cre(1) - cls(1), cre(0) - cls(0));
+            L2 = sqrtf(ell * ell - 4.0 * R * R) + R * mo(2.0 * M_PI_F + mo(theta2) - mo(dubinspath_.chis - M_PI_2_F)) +
+                 R * mo(2.0 * M_PI_F + mo(theta2 + M_PI_F) - mo(dubinspath_.chie + M_PI_2_F));
+        }
+        ROS_INFO("value of theta and theta2 in calculation of L2 are %f and %f\n", theta, theta2);
+        // compute L3
+        ell = (cre - cls).norm();
+        theta = atan2f(cre(1) - cls(1), cre(0) - cls(0));
+        float L3;
+        if (2.0 * R > ell)
+            L3 = 9999.0f;
+        else {
             theta2 = acosf(2.0 * R / ell);
-            dubinspath_.q1 = rotz(theta + theta2 - M_PI_2_F) * e1;
-            dubinspath_.w1 = dubinspath_.cs + (rotz(theta + theta2) * e1) * R;
-            dubinspath_.w2 = dubinspath_.ce + (rotz(theta + theta2 - M_PI_F) * e1) * R;
-            break;
-        case 4:
-            dubinspath_.cs = cls;
-            dubinspath_.lams = -1;
-            dubinspath_.ce = cle;
-            dubinspath_.lame = -1;
-            dubinspath_.q1 = (cle - cls).normalized();
-            dubinspath_.w1 = dubinspath_.cs + (rotz(M_PI_2_F) * dubinspath_.q1) * R;
-            dubinspath_.w2 = dubinspath_.ce + (rotz(M_PI_2_F) * dubinspath_.q1) * R;
-            break;
+            L3 = sqrtf(ell * ell - 4 * R * R) + R * mo(2.0 * M_PI_F + mo(dubinspath_.chis + M_PI_2_F) - mo(theta + theta2)) +
+                 R * mo(2.0 * M_PI_F + mo(dubinspath_.chie - M_PI_2_F) - mo(theta + theta2 - M_PI_F));
+        }
+        ROS_INFO("value of theta and theta2 in calculation of L3 are %f and %f\n", theta, theta2);
+        // compute L4
+        theta = atan2f(cle(1) - cls(1), cle(0) - cls(0));
+        float L4 = (cls - cle).norm() + R * mo(2.0 * M_PI_F + mo(dubinspath_.chis + M_PI_2_F) - mo(theta + M_PI_2_F)) +
+                   R * mo(2.0 * M_PI_F + mo(theta + M_PI_2_F) - mo(dubinspath_.chie + M_PI_2_F));
+        ROS_INFO("value of theta in calculation of L4 is %f\n", theta);
+        // L is the minimum distance
+        int idx = 1;
+        dubinspath_.L = L1;
+        if (L2 < dubinspath_.L) {
+            dubinspath_.L = L2;
+            idx = 2;
+        }
+        if (L3 < dubinspath_.L) {
+            dubinspath_.L = L3;
+            idx = 3;
+        }
+        if (L4 < dubinspath_.L) {
+            dubinspath_.L = L4;
+            idx = 4;
+        }
+        ROS_INFO("Value of chi_d of start_node and end_node,i.e. chi_s and chi_e respectively are %f and %f\n", start_node.chi_d, end_node.chi_d);
+        ROS_INFO("L1, L2, L3,L4 and L_min are %f, %f, %f, %f and %f respectively", L1, L2, L3, L4, dubinspath_.L);
+
+        Eigen::Vector3f e1;
+        //        e1.zero();
+        e1(0) = 1;
+        e1(1) = 0;
+        e1(2) = 0;
+        switch (idx) {
+            case 1:
+                dubinspath_.cs = crs;
+                dubinspath_.lams = 1;
+                dubinspath_.ce = cre;
+                dubinspath_.lame = 1;
+                dubinspath_.q1 = (cre - crs).normalized();
+                dubinspath_.w1 = dubinspath_.cs + (rotz(-M_PI_2_F) * dubinspath_.q1) * R;
+                dubinspath_.w2 = dubinspath_.ce + (rotz(-M_PI_2_F) * dubinspath_.q1) * R;
+                break;
+            case 2:
+                dubinspath_.cs = crs;
+                dubinspath_.lams = 1;
+                dubinspath_.ce = cle;
+                dubinspath_.lame = -1;
+                ell = (cle - crs).norm();
+                theta = atan2f(cle(1) - crs(1), cle(0) - crs(0));
+                theta2 = theta - M_PI_2_F + asinf(2.0 * R / ell);
+                dubinspath_.q1 = rotz(theta2 + M_PI_2_F) * e1;
+                dubinspath_.w1 = dubinspath_.cs + (rotz(theta2) * e1) * R;
+                dubinspath_.w2 = dubinspath_.ce + (rotz(theta2 + M_PI_F) * e1) * R;
+                break;
+            case 3:
+                dubinspath_.cs = cls;
+                dubinspath_.lams = -1;
+                dubinspath_.ce = cre;
+                dubinspath_.lame = 1;
+                ell = (cre - cls).norm();
+                theta = atan2f(cre(1) - cls(1), cre(0) - cls(0));
+                theta2 = acosf(2.0 * R / ell);
+                dubinspath_.q1 = rotz(theta + theta2 - M_PI_2_F) * e1;
+                dubinspath_.w1 = dubinspath_.cs + (rotz(theta + theta2) * e1) * R;
+                dubinspath_.w2 = dubinspath_.ce + (rotz(theta + theta2 - M_PI_F) * e1) * R;
+                break;
+            case 4:
+                dubinspath_.cs = cls;
+                dubinspath_.lams = -1;
+                dubinspath_.ce = cle;
+                dubinspath_.lame = -1;
+                dubinspath_.q1 = (cle - cls).normalized();
+                dubinspath_.w1 = dubinspath_.cs + (rotz(M_PI_2_F) * dubinspath_.q1) * R;
+                dubinspath_.w2 = dubinspath_.ce + (rotz(M_PI_2_F) * dubinspath_.q1) * R;
+                break;
+        }
+        dubinspath_.w3 = dubinspath_.pe;
+        dubinspath_.q3 = rotz(dubinspath_.chie) * e1;
+        dubinspath_.R = R;
+        loop_num++;
     }
-    dubinspath_.w3 = dubinspath_.pe;
-    dubinspath_.q3 = rotz(dubinspath_.chie) * e1;
-    dubinspath_.R = R;
-    loop_num++;
-    // }
 }
 
 }  // namespace rosplane

@@ -2,7 +2,7 @@
 #include <rosplane_msgs/Waypoint.h>
 #include <visualization_msgs/MarkerArray.h>
 
-#define num_waypoints 33  // kept 8 initially
+#define num_waypoints 33  // kept 33(8*4 + 1) initially
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "rosplane_simple_path_planner");
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     float Va;
     nh_.param<float>("Va", Va, 2.0);
     float wps[5 * num_waypoints];
-    // = {
+    //  = {
     // 17.3143, 40.6263, -20, -0.765049, Va,
     // these were the points that try to generate a figure like the actual problem statement..launch pos was -40.0, r_min was 25.0, left_y was 48.66,
     // right_y was 108.66
@@ -79,27 +79,23 @@ int main(int argc, char** argv) {
     //     Va,
 
     //     // 0, 200, -20, 45 * M_PI / 180, Va, 200, 200, -20, 225 * M_PI / 180, Va,
-    //     // 60,
-    //     // 0,
-    //     // -20,
-    //     // 0 * M_PI / 180,
-    //     // Va,
-    //     // 150,
-    //     // 50,
-    //     // -20,
-    //     // 180 * M_PI / 180,
-    //     // Va,
-    //     // 50,
-    //     // 50,
-    //     // -20,
-    //     // 0 * M_PI / 180,
-    //     // Va,
-    //     // 150,
-    //     // 50,
-    //     // -20,
-    //     // 180 * M_PI / 180,
-    //     // Va,
+    // 200,
+    // 0,
+    // -50,
+    // 45 * M_PI / 180,
+    // Va,
+    // 0,
+    // 200,
+    // -50,
+    // 45 * M_PI / 180,
+    // Va,
+    // 200,
+    // 200,
+    // -50,
+    // 225 * M_PI / 180,
+    // Va,
     // };
+
     visualization_msgs::Marker marker;
     marker.type = visualization_msgs::Marker::POINTS;
     marker.action = visualization_msgs::Marker::ADD;
@@ -128,7 +124,7 @@ int main(int argc, char** argv) {
     for (int j = 0; j < (num_waypoints - 1) / 4; j++) {
         if (!j) {
             wps[20 * i] = loop_entry_point_x;
-            wps[20 * i + 1] = loop_entry_point_y;
+            wps[20 * i + 1] = -loop_entry_point_y;
             wps[20 * i + 2] = height;
             wps[20 * i + 3] = -tangency_angle_;
             wps[20 * i + 4] = Va;
@@ -139,7 +135,7 @@ int main(int argc, char** argv) {
             marker.points.push_back(p);
         } else {
             wps[20 * i] = r;
-            wps[20 * i + 1] = left_y;
+            wps[20 * i + 1] = -left_y;
             wps[20 * i + 2] = height;
             wps[20 * i + 3] = -M_PI / 2;
             wps[20 * i + 4] = Va;
@@ -150,7 +146,7 @@ int main(int argc, char** argv) {
             marker.points.push_back(p);
         }
         wps[20 * i + 5] = r;
-        wps[20 * i + 6] = right_y;
+        wps[20 * i + 6] = -right_y;
         wps[20 * i + 7] = height;
         wps[20 * i + 8] = -M_PI / 2;
         wps[20 * i + 9] = Va;
@@ -161,7 +157,7 @@ int main(int argc, char** argv) {
         marker.points.push_back(p);
 
         wps[20 * i + 10] = -r;
-        wps[20 * i + 11] = right_y;
+        wps[20 * i + 11] = -right_y;
         wps[20 * i + 12] = height;
         wps[20 * i + 13] = M_PI / 2;
         wps[20 * i + 14] = Va;
@@ -173,7 +169,7 @@ int main(int argc, char** argv) {
 
         if (j == (num_waypoints - 5) / 4) {
             wps[20 * i + 15] = loop_exit_point_x;
-            wps[20 * i + 16] = loop_exit_point_x;
+            wps[20 * i + 16] = -loop_exit_point_y;
             wps[20 * i + 17] = height;
             wps[20 * i + 18] = tangency_angle_;
             wps[20 * i + 19] = Va;
@@ -184,7 +180,7 @@ int main(int argc, char** argv) {
             marker.points.push_back(p);
         } else {
             wps[20 * i + 15] = -r;
-            wps[20 * i + 16] = left_y;
+            wps[20 * i + 16] = -left_y;
             wps[20 * i + 17] = height;
             wps[20 * i + 18] = M_PI / 2;
             wps[20 * i + 19] = Va;
@@ -198,7 +194,7 @@ int main(int argc, char** argv) {
         i++;
     }
     wps[20 * i] = hunter_killer_x;
-    wps[20 * i + 1] = hunter_killer_y;
+    wps[20 * i + 1] = -hunter_killer_y;
     wps[20 * i + 2] = height;
     wps[20 * i + 3] = tangency_angle_;
     wps[20 * i + 4] = Va;
@@ -230,7 +226,7 @@ int main(int argc, char** argv) {
     }
     ros::Duration(1.5).sleep();
 
-    while(ros::ok()) {
+    while (ros::ok()) {
         visualize_points_pub.publish(marker);
         ros::Duration(0.5).sleep();
     }

@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /Marker1
         - /Path1
       Splitter Ratio: 0.5
     Tree Height: 549
@@ -52,6 +53,14 @@ Visualization Manager:
       Plane: XY
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /fixedwing/visualize_points
+      Name: Marker
+      Namespaces:
+        {}
+      Queue Size: 100
       Value: true
     - Alpha: 1
       Buffer Length: 1
@@ -125,7 +134,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 10
+      Distance: 159.1124267578125
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
