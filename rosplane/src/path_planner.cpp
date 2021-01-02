@@ -128,7 +128,9 @@ int main(int argc, char** argv) {
             marker.pose.position.x = wps[20 * i];
             marker.pose.position.y = -wps[20 * i + 1];
             marker.pose.position.z = -wps[20 * i + 2];
-            marker.pose.orientation.z = sin(-tangency_angle_ / 2);
+            marker.pose.orientation.x = cos(-tangency_angle_ / 2);
+            marker.pose.orientation.y = -sin(-tangency_angle_ / 2);
+            marker.pose.orientation.z = -sin(-tangency_angle_ / 2);
             marker.pose.orientation.w = cos(-tangency_angle_ / 2);
             marker_array.markers.push_back(marker);
         } else {
@@ -141,7 +143,9 @@ int main(int argc, char** argv) {
             marker.pose.position.x = wps[20 * i];
             marker.pose.position.y = -wps[20 * i + 1];
             marker.pose.position.z = -wps[20 * i + 2];
-            marker.pose.orientation.z = sin(-M_PI / 2);
+            marker.pose.orientation.x = cos(-M_PI / 2);
+            marker.pose.orientation.y = -sin(-M_PI / 2);
+            marker.pose.orientation.z = -sin(-M_PI / 2);
             marker.pose.orientation.w = cos(-M_PI / 2);
             marker_array.markers.push_back(marker);
         }
@@ -153,7 +157,9 @@ int main(int argc, char** argv) {
         marker.pose.position.x = wps[20 * i + 5];
         marker.pose.position.y = -wps[20 * i + 6];
         marker.pose.position.z = -wps[20 * i + 7];
-        marker.pose.orientation.z = sin(-M_PI / 2);
+        marker.pose.orientation.x = cos(-M_PI / 2);
+        marker.pose.orientation.y = -sin(-M_PI / 2);
+        marker.pose.orientation.z = -sin(-M_PI / 2);
         marker.pose.orientation.w = cos(-M_PI / 2);
         marker_array.markers.push_back(marker);
 
@@ -165,7 +171,9 @@ int main(int argc, char** argv) {
         marker.pose.position.x = wps[20 * i + 10];
         marker.pose.position.y = -wps[20 * i + 11];
         marker.pose.position.z = -wps[20 * i + 12];
-        marker.pose.orientation.z = sin(M_PI / 2);
+        marker.pose.orientation.x = cos(M_PI / 2);
+        marker.pose.orientation.y = -sin(M_PI / 2);
+        marker.pose.orientation.z = -sin(M_PI / 2);
         marker.pose.orientation.w = cos(M_PI / 2);
         marker_array.markers.push_back(marker);
 
@@ -178,7 +186,9 @@ int main(int argc, char** argv) {
             marker.pose.position.x = wps[20 * i + 15];
             marker.pose.position.y = -wps[20 * i + 16];
             marker.pose.position.z = -wps[20 * i + 17];
-            marker.pose.orientation.z = sin(tangency_angle_ / 2);
+            marker.pose.orientation.x = cos(tangency_angle_ / 2);
+            marker.pose.orientation.y = -sin(tangency_angle_ / 2);
+            marker.pose.orientation.z = -sin(tangency_angle_ / 2);
             marker.pose.orientation.w = cos(tangency_angle_ / 2);
             marker_array.markers.push_back(marker);
         } else {
@@ -190,7 +200,7 @@ int main(int argc, char** argv) {
             marker.pose.position.x = wps[20 * i + 15];
             marker.pose.position.y = -wps[20 * i + 16];
             marker.pose.position.z = -wps[20 * i + 17];
-            marker.pose.orientation.z = sin(M_PI / 2);
+            marker.pose.orientation.z = -sin(M_PI / 2);
             marker.pose.orientation.w = cos(M_PI / 2);
             marker_array.markers.push_back(marker);
         }
@@ -205,7 +215,9 @@ int main(int argc, char** argv) {
     marker.pose.position.x = wps[20 * i];
     marker.pose.position.y = -wps[20 * i + 1];
     marker.pose.position.z = -wps[20 * i + 2];
-    marker.pose.orientation.z = sin(tangency_angle_ / 2);
+    marker.pose.orientation.x = cos(tangency_angle_ / 2);
+    marker.pose.orientation.y = -sin(tangency_angle_ / 2);
+    marker.pose.orientation.z = -sin(tangency_angle_ / 2);
     marker.pose.orientation.w = cos(tangency_angle_ / 2);
     marker_array.markers.push_back(marker);
 
