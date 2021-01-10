@@ -304,8 +304,15 @@ float path_manager_example::mo(float in) {
 void path_manager_example::dubinsParameters(const waypoint_s start_node, const waypoint_s end_node, float R) {
     float ell =
         sqrtf((start_node.w[0] - end_node.w[0]) * (start_node.w[0] - end_node.w[0]) + (start_node.w[1] - end_node.w[1]) * (start_node.w[1] - end_node.w[1]));
+    ROS_INFO("The start points are %f, %f, %f", start_node.w[0], start_node.w[1], start_node.w[2]);
+    ROS_INFO("The end points are %f, %f, %f", end_node.w[0], end_node.w[1], end_node.w[2]);
+    ROS_INFO("The distance between the two is %f and the value of R is %f",
+        sqrt(pow(end_node.w[0] - start_node.w[0], 2) + pow(end_node.w[1] - start_node.w[1], 2) + pow(end_node.w[2] - start_node.w[2], 2)),
+        R);
+    ROS_INFO("Value of Va_d at start_node is %f and at end_node is %f", start_node.Va_d, end_node.Va_d);
     if (ell < 2.0 * R) {
         ROS_ERROR("The distance between nodes must be larger than 2R.");
+
     } else {
         static int loop_num = 0;
         dubinspath_.ps(0) = start_node.w[0];
