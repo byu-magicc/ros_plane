@@ -6,7 +6,8 @@
 class RosplaneDubins {
   public:
     void init(ros::NodeHandle& nh);
-    void run();
+    // void run(std::vector<waypoint_s>& waypoints_);
+    std::vector<float> wps;
 
   private:
     void computeTangencyPoints();
@@ -27,8 +28,7 @@ class RosplaneDubins {
     float Va;
     int num_waypoints;
     int num_loops;
-
-    std::vector<float> wps;
+    int speed_red_factor;
 
     visualization_msgs::MarkerArray marker_array;
     ros::Publisher waypointPublisher;

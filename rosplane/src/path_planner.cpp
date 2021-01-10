@@ -1,7 +1,7 @@
 #include <path_planner.h>
 
 void RosplaneDubins::init(ros::NodeHandle& nh) {
-    waypointPublisher = nh.advertise<rosplane_msgs::Waypoint>("waypoint_path", 10);
+    waypointPublisher = nh.advertise<rosplane_msgs::Waypoint>("waypoint_path", 40);
     visualize_points_pub = nh.advertise<visualization_msgs::Marker>("visualize_points", 10);
 
     nh.param<double>("R_min", r, 25.0);
@@ -10,8 +10,9 @@ void RosplaneDubins::init(ros::NodeHandle& nh) {
     nh.param<double>("right_pylon_y", right_y, 408.66);
     nh.param<double>("height", height, -20);
     nh.param<float>("Va", Va, 2.0);
-    nh.param<int>("num_waypoints", num_waypoints, 33);
+    nh.param<int>("num_waypoints", num_waypoints, 48);
     nh.param<int>("num_loops", num_loops, 8);
+    nh.param<int>("speed_red_factor", speed_red_factor, 6);
 
     wps.resize(5 * num_waypoints);
     RosplaneDubins::computeTangencyPoints();
@@ -156,27 +157,69 @@ void RosplaneDubins::computePoints() {
     // visualize_points_pub.publish(marker);
     // ros::Duration(0.5).sleep();
     // marker_array.markers.push_back(marker);
-    wps[0] = r;
-    wps[1] = -208.66;
-    wps[2] = -20;
-    wps[3] = -M_PI / 2;
-    wps[4] = Va;
-    wps[5] = -r;
-    wps[6] = -408.66;
-    wps[7] = -20;
-    wps[8] = M_PI / 2;
-    wps[9] = Va;
-    for (int i = 1; i <= (num_loops - 1); i++) {
-        wps[10 * i] = r;
-        wps[10 * i + 1] = -8.66;
-        wps[10 * i + 2] = -20;
-        wps[10 * i + 3] = -M_PI / 2;
-        wps[10 * i + 4] = Va;
-        wps[10 * i + 5] = -r;
-        wps[10 * i + 6] = -408.66;
-        wps[10 * i + 7] = -20;
-        wps[10 * i + 8] = M_PI / 2;
-        wps[10 * i + 9] = Va;
+    // wps[0] = r;
+    // wps[1] = -208.66;
+    // wps[2] = -20;
+    // wps[3] = -M_PI / 2;
+    // wps[4] = Va;
+    // wps[5] = -r;
+    // wps[6] = -408.66;
+    // wps[7] = -20;
+    // wps[8] = M_PI / 2;
+    // wps[9] = Va;
+    for (int i = 0; i < num_loops; i++) {
+        if (i == 0) {
+            wps[30 * i] = r;
+            wps[30 * i + 1] = -80.66;
+            wps[30 * i + 2] = -20;
+            wps[30 * i + 3] = -M_PI / 2;
+            wps[30 * i + 4] = Va / speed_red_factor;
+        } else {
+            wps[30 * i] = r;
+            wps[30 * i + 1] = -8.66;
+            wps[30 * i + 2] = -20;
+            wps[30 * i + 3] = -M_PI / 2;
+            wps[30 * i + 4] = Va / speed_red_factor;
+        }
+
+        wps[30 * i + 5] = r;
+        wps[30 * i + 6] = -200.66;
+        wps[30 * i + 7] = -20;
+        wps[30 * i + 8] = -M_PI / 2;
+        wps[30 * i + 9] = Va;
+
+        wps[30 * i + 10] = r;
+        wps[30 * i + 11] = -320.66;
+        wps[30 * i + 12] = -20;
+        wps[30 * i + 13] = -M_PI / 2;
+        wps[30 * i + 14] = Va / speed_red_factor;
+
+        // Lower half points start from here:
+        wps[30 * i + 15] = -r;
+        wps[30 * i + 16] = -408.66;
+        wps[30 * i + 17] = -20;
+        wps[30 * i + 18] = M_PI / 2;
+        wps[30 * i + 19] = Va / speed_red_factor;
+
+        wps[30 * i + 20] = -r;
+        wps[30 * i + 21] = -200.66;
+        wps[30 * i + 22] = -20;
+        wps[30 * i + 23] = M_PI / 2;
+        wps[30 * i + 24] = Va;
+
+        if (i != num_loops - 1) {
+            wps[30 * i + 25] = -r;
+            wps[30 * i + 26] = -80.66;
+            wps[30 * i + 27] = -20;
+            wps[30 * i + 28] = M_PI / 2;
+            wps[30 * i + 29] = Va / speed_red_factor;
+        } else {
+            wps[30 * i + 25] = -r;
+            wps[30 * i + 26] = -8.66;
+            wps[30 * i + 27] = -20;
+            wps[30 * i + 28] = M_PI / 2;
+            wps[30 * i + 29] = Va / speed_red_factor;
+        }
     }
     // wps[70] = -40.0;//position of hunter killer.
     // wps[71] = 0.0;
@@ -185,40 +228,49 @@ void RosplaneDubins::computePoints() {
     // wps[74] = Va;
 }
 
-void RosplaneDubins::run() {
-    for (int i(0); i < num_waypoints; i++) {
-        ros::Duration(0.5).sleep();
+// void RosplaneDubins::run(std::vector<waypoint_s>& waypoints_) {
+//     for (int i(0); i < num_waypoints; i++) {
+//         // ros::Duration(1.0).sleep();
 
-        rosplane_msgs::Waypoint new_waypoint;
+//         // rosplane_msgs::Waypoint new_waypoint;
 
-        new_waypoint.w[0] = wps[i * 5 + 0];
-        new_waypoint.w[1] = wps[i * 5 + 1];
-        new_waypoint.w[2] = wps[i * 5 + 2];
-        new_waypoint.chi_d = wps[i * 5 + 3];
+//         // new_waypoint.w[0] = wps[i * 5 + 0];
+//         // new_waypoint.w[1] = wps[i * 5 + 1];
+//         // new_waypoint.w[2] = wps[i * 5 + 2];
+//         // new_waypoint.chi_d = wps[i * 5 + 3];
 
-        new_waypoint.chi_valid = true;
-        new_waypoint.Va_d = wps[i * 5 + 4];
-        if (i == 0)
-            new_waypoint.set_current = true;
-        else
-            new_waypoint.set_current = false;
-        new_waypoint.clear_wp_list = false;
+//         // new_waypoint.chi_valid = true;
+//         // new_waypoint.Va_d = wps[i * 5 + 4];
+//         // if (i == 0)
+//         //     new_waypoint.set_current = true;
+//         // else
+//         //     new_waypoint.set_current = false;
+//         // new_waypoint.clear_wp_list = false;
 
-        waypointPublisher.publish(new_waypoint);
-    }
-    ros::Duration(1.5).sleep();
+//         // waypointPublisher.publish(new_waypoint);
+//         waypoint_s nextwp;
+//         nextwp.w[0] = wps[i * 5 + 0];
+//         nextwp.w[1] = wps[i * 5 + 1];
+//         nextwp.w[2] = wps[i * 5 + 2];
+//         nextwp.chi_d = wps[i * 5 + 3];
+//         nextwp.chi_valid = true;
+//         nextwp.Va_d = wps[i * 5 + 4];
+//         waypoints_.push_back(nextwp);
+//         num_waypoints_++;
+//     }
+//     ros::Duration(1.5).sleep();
 
-    while (ros::ok()) {
-        visualize_points_pub.publish(marker_array);
-        ros::Duration(0.5).sleep();
-    }
-}
+//     while (ros::ok()) {
+//         visualize_points_pub.publish(marker_array);
+//         ros::Duration(0.5).sleep();
+//     }
+// }
 
-int main(int argc, char** argv) {
-    ros::init(argc, argv, "rosplane_simple_path_planner");
-    ros::NodeHandle nh;
-    RosplaneDubins trajectory;
+// int main(int argc, char** argv) {
+//     ros::init(argc, argv, "rosplane_simple_path_planner");
+//     ros::NodeHandle nh;
+//     RosplaneDubins trajectory;
 
-    trajectory.init(nh);
-    trajectory.run();
-}
+//     // trajectory.init(nh);
+//     // trajectory.run();
+// }

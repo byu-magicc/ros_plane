@@ -1,5 +1,6 @@
 #include "path_manager_base.h"
 #include "path_manager_example.h"
+#include "path_planner.h"
 
 namespace rosplane {
 
@@ -11,7 +12,7 @@ path_manager_base::path_manager_base()
     nh_private_.param<double>("update_rate", update_rate_, 10.0);
 
     vehicle_state_sub_ = nh_.subscribe("state", 10, &path_manager_base::vehicle_state_callback, this);
-    new_waypoint_sub_ = nh_.subscribe("waypoint_path", 10, &path_manager_base::new_waypoint_callback, this);
+    new_waypoint_sub_ = nh_.subscribe("waypoint_path", 40, &path_manager_base::new_waypoint_callback, this);
     current_path_pub_ = nh_.advertise<rosplane_msgs::Current_Path>("current_path", 10);
 
     update_timer_ = nh_.createTimer(ros::Duration(1.0 / update_rate_), &path_manager_base::current_path_publish, this);
@@ -19,11 +20,46 @@ path_manager_base::path_manager_base()
     num_waypoints_ = 0;
 
     state_init_ = false;
-}
 
+    RosplaneDubins trajectory;
+    trajectory.init(nh_);
+    // trajectory.run(this->waypoints_);
+    for (int i(0); i < 18; i++) {
+        // ros::Duration(1.0).sleep();
+
+        // rosplane_msgs::Waypoint new_waypoint;
+
+        // new_waypoint.w[0] = wps[i * 5 + 0];
+        // new_waypoint.w[1] = wps[i * 5 + 1];
+        // new_waypoint.w[2] = wps[i * 5 + 2];
+        // new_waypoint.chi_d = wps[i * 5 + 3];
+
+        // new_waypoint.chi_valid = true;
+        // new_waypoint.Va_d = wps[i * 5 + 4];
+        // if (i == 0)
+        //     new_waypoint.set_current = true;
+        // else
+        //     new_waypoint.set_current = false;
+        // new_waypoint.clear_wp_list = false;
+
+        // waypointPublisher.publish(new_waypoint);
+        waypoint_s nextwp;
+        nextwp.w[0] = trajectory.wps[i * 5 + 0];
+        nextwp.w[1] = trajectory.wps[i * 5 + 1];
+        nextwp.w[2] = trajectory.wps[i * 5 + 2];
+        nextwp.chi_d = trajectory.wps[i * 5 + 3];
+        if (i % 3 == 0)
+            nextwp.chi_valid = true;
+        else
+            nextwp.chi_valid = false;
+        nextwp.Va_d = trajectory.wps[i * 5 + 4];
+        waypoints_.push_back(nextwp);
+        num_waypoints_++;
+    }
+    // num_waypoints_ = this->waypoints_.size();
+}
 void path_manager_base::vehicle_state_callback(const rosplane_msgs::StateConstPtr& msg) {
     vehicle_state_ = *msg;
-
     state_init_ = true;
 }
 
