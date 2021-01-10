@@ -26,6 +26,7 @@ class RosplaneDubins {
     double loop_exit_point_y;
     float Va;
     int num_waypoints;
+    int num_loops;
 
     std::vector<float> wps;
 
