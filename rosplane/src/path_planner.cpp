@@ -2,7 +2,7 @@
 
 void RosplaneDubins::init(ros::NodeHandle& nh) {
     waypointPublisher = nh.advertise<rosplane_msgs::Waypoint>("waypoint_path", 10);
-    visualize_points_pub = nh.advertise<visualization_msgs::MarkerArray>("visualize_points", 10);
+    visualize_points_pub = nh.advertise<visualization_msgs::Marker>("visualize_points", 10);
 
     nh.param<double>("R_min", r, 25.0);
     nh.param<double>("launch_position_x", start_x, -5.0);
@@ -11,6 +11,7 @@ void RosplaneDubins::init(ros::NodeHandle& nh) {
     nh.param<double>("height", height, -20);
     nh.param<float>("Va", Va, 2.0);
     nh.param<int>("num_waypoints", num_waypoints, 33);
+    nh.param<int>("num_loops", num_loops, 8);
 
     wps.resize(5 * num_waypoints);
     RosplaneDubins::computeTangencyPoints();
@@ -18,13 +19,13 @@ void RosplaneDubins::init(ros::NodeHandle& nh) {
 }
 
 void RosplaneDubins::computeTangencyPoints() {
-    double l = sqrt(start_x * start_x + left_y * left_y);  // launch position to left pylon distance
-    double zen_angle = acos(left_y / l);                   // angle between y-axis and line joining launch position and pylon
-    tangency_angle_ = acos(r / l) - zen_angle;
-    loop_entry_point_x = r * sin(tangency_angle_);
-    loop_entry_point_y = left_y - r * cos(tangency_angle_);
-    loop_exit_point_x = -r * sin(tangency_angle_);
-    loop_exit_point_y = left_y - r * cos(tangency_angle_);
+    //     double l = sqrt(start_x * start_x + left_y * left_y);  // launch position to left pylon distance
+    //     double zen_angle = acos(left_y / l);                   // angle between y-axis and line joining launch position and pylon
+    //     tangency_angle_ = acos(r / l) - zen_angle;
+    //     loop_entry_point_x = r * sin(tangency_angle_);
+    //     loop_entry_point_y = left_y - r * cos(tangency_angle_);
+    //     loop_exit_point_x = -r * sin(tangency_angle_);
+    //     loop_exit_point_y = left_y - r * cos(tangency_angle_);
 }
 
 void RosplaneDubins::computePoints() {
@@ -155,26 +156,26 @@ void RosplaneDubins::computePoints() {
     // visualize_points_pub.publish(marker);
     // ros::Duration(0.5).sleep();
     // marker_array.markers.push_back(marker);
-    wps[0] = 11.4256;
-    wps[1] = 26.4236;
+    wps[0] = r;
+    wps[1] = -208.66;
     wps[2] = -20;
-    wps[3] = 0.426903;
+    wps[3] = -M_PI / 2;
     wps[4] = Va;
-    wps[5] = -25;
-    wps[6] = 108.66;
+    wps[5] = -r;
+    wps[6] = -408.66;
     wps[7] = -20;
-    wps[8] = -M_PI / 2;
+    wps[8] = M_PI / 2;
     wps[9] = Va;
-    for (int i = 0; i < 7; i++) {
-        wps[10 * i] = 11.4256;
-        wps[10 * i + 1] = 26.4236;
+    for (int i = 1; i <= (num_loops - 1); i++) {
+        wps[10 * i] = r;
+        wps[10 * i + 1] = -8.66;
         wps[10 * i + 2] = -20;
-        wps[10 * i + 3] = 0;
+        wps[10 * i + 3] = -M_PI / 2;
         wps[10 * i + 4] = Va;
-        wps[10 * i + 5] = -25;
-        wps[10 * i + 6] = 108.66;
+        wps[10 * i + 5] = -r;
+        wps[10 * i + 6] = -408.66;
         wps[10 * i + 7] = -20;
-        wps[10 * i + 8] = -M_PI / 2;
+        wps[10 * i + 8] = M_PI / 2;
         wps[10 * i + 9] = Va;
     }
     // wps[70] = -40.0;//position of hunter killer.
