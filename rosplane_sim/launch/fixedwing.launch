@@ -5,8 +5,8 @@
   <arg name="mav_name"            default="fixedwing"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="paused" value="false"/>
-    <arg name="gui" value="false"/>
+    <arg name="paused" value="true"/>
+    <arg name="gui" value="true"/>
     <arg name="verbose" value="false"/>
     <arg name="debug" value="false"/>
   </include>
@@ -15,10 +15,10 @@
   <include file="$(find rosplane_sim)/launch/spawn_mav.launch">
     <arg name="mav_name"            value="$(arg mav_name)" />
     <arg name="model"               value="$(find rosplane_sim)/xacro/$(arg mav_name).xacro" />
-    <arg name="x"                   value="-40.0"/> 
+    <arg name="x"                   value="-5.0"/> 
     <arg name="y"                   value="0.0"/>
     <arg name="z"                   value="20"/>
-    <arg name="yaw"                 value="-0.426903"/> This value needs to kept equal to the tangency_angle of the loop_entry_point declared in path_planner.cpp
+    <arg name="yaw"                 value="1.0"/> <!--This value needs to kept equal to the tangency_angle of the loop_entry_point declared in path_planner.cpp-->
   </include>
 
   <group ns="$(arg mav_name)">
@@ -47,6 +47,6 @@
       <remap from="state" to="truth"/>
     </node>
 
-    <node name="pathplanner" pkg="rosplane" type="rosplane_path_planner"/> 
+    <!-- <node name="pathplanner" pkg="rosplane" type="rosplane_path_planner"/>  -->
   </group>
 </launch>
