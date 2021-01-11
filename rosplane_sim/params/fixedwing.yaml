@@ -128,6 +128,8 @@ launch_position_x: -40.0
 left_pylon_y: 48.66
 right_pylon_y: 108.66 # Kept it different from 408.66 (i.e. the actual position of the right pylon) just for testing.
 height: -20
-Va: 12
-num_waypoints: 16
+Va: 8
+num_waypoints: 18
+num_loops: 3
+speed_red_factor: 1 # Determines the factor by which the speed has to be reduced near the pylons.
 update_rate: 10
