@@ -23,8 +23,7 @@ path_manager_base::path_manager_base()
 
     RosplaneDubins trajectory;
     trajectory.init(nh_);
-    // trajectory.run(this->waypoints_);
-    for (int i(0); i < 18; i++) {
+    for (int i(0); i < 80; i++) {
         // ros::Duration(1.0).sleep();
 
         // rosplane_msgs::Waypoint new_waypoint;
@@ -48,15 +47,12 @@ path_manager_base::path_manager_base()
         nextwp.w[1] = trajectory.wps[i * 5 + 1];
         nextwp.w[2] = trajectory.wps[i * 5 + 2];
         nextwp.chi_d = trajectory.wps[i * 5 + 3];
-        if (i % 3 == 0)
-            nextwp.chi_valid = true;
-        else
-            nextwp.chi_valid = false;
+
+        nextwp.chi_valid = (i == 79);
         nextwp.Va_d = trajectory.wps[i * 5 + 4];
         waypoints_.push_back(nextwp);
         num_waypoints_++;
     }
-    // num_waypoints_ = this->waypoints_.size();
 }
 void path_manager_base::vehicle_state_callback(const rosplane_msgs::StateConstPtr& msg) {
     vehicle_state_ = *msg;

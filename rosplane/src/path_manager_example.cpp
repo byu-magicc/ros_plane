@@ -22,11 +22,12 @@ void path_manager_example::manage(const params_s& params, const input_s& input, 
         output.lambda = 1;
     } else {
         if (waypoints_[idx_a_].chi_valid) {
-            manage_dubins(params, input, output);
+            // manage_dubins(params, input, output);
+            manage_line(params, input, output);
         } else {
             /** Switch the following for flying directly to waypoints, or filleting corners */
-            manage_line(params, input, output);
-            // manage_fillet(params, input, output);
+            // manage_line(params, input, output);
+            manage_fillet(params, input, output);
         }
     }
 }
