@@ -21,38 +21,38 @@ path_manager_base::path_manager_base()
 
     state_init_ = false;
 
-    RosplaneDubins trajectory;
-    trajectory.init(nh_);
-    for (int i(0); i < 80; i++) {
-        // ros::Duration(1.0).sleep();
+    // RosplaneDubins trajectory;
+    // trajectory.init(nh_);
+    // for (int i(0); i < 80; i++) {
+    //     // ros::Duration(1.0).sleep();
 
-        // rosplane_msgs::Waypoint new_waypoint;
+    //     // rosplane_msgs::Waypoint new_waypoint;
 
-        // new_waypoint.w[0] = wps[i * 5 + 0];
-        // new_waypoint.w[1] = wps[i * 5 + 1];
-        // new_waypoint.w[2] = wps[i * 5 + 2];
-        // new_waypoint.chi_d = wps[i * 5 + 3];
+    //     // new_waypoint.w[0] = wps[i * 5 + 0];
+    //     // new_waypoint.w[1] = wps[i * 5 + 1];
+    //     // new_waypoint.w[2] = wps[i * 5 + 2];
+    //     // new_waypoint.chi_d = wps[i * 5 + 3];
 
-        // new_waypoint.chi_valid = true;
-        // new_waypoint.Va_d = wps[i * 5 + 4];
-        // if (i == 0)
-        //     new_waypoint.set_current = true;
-        // else
-        //     new_waypoint.set_current = false;
-        // new_waypoint.clear_wp_list = false;
+    //     // new_waypoint.chi_valid = true;
+    //     // new_waypoint.Va_d = wps[i * 5 + 4];
+    //     // if (i == 0)
+    //     //     new_waypoint.set_current = true;
+    //     // else
+    //     //     new_waypoint.set_current = false;
+    //     // new_waypoint.clear_wp_list = false;
 
-        // waypointPublisher.publish(new_waypoint);
-        waypoint_s nextwp;
-        nextwp.w[0] = trajectory.wps[i * 5 + 0];
-        nextwp.w[1] = trajectory.wps[i * 5 + 1];
-        nextwp.w[2] = trajectory.wps[i * 5 + 2];
-        nextwp.chi_d = trajectory.wps[i * 5 + 3];
+    //     // waypointPublisher.publish(new_waypoint);
+    //     waypoint_s nextwp;
+    //     nextwp.w[0] = trajectory.wps[i * 5 + 0];
+    //     nextwp.w[1] = trajectory.wps[i * 5 + 1];
+    //     nextwp.w[2] = trajectory.wps[i * 5 + 2];
+    //     nextwp.chi_d = trajectory.wps[i * 5 + 3];
 
-        nextwp.chi_valid = (i == 79);
-        nextwp.Va_d = trajectory.wps[i * 5 + 4];
-        waypoints_.push_back(nextwp);
-        num_waypoints_++;
-    }
+    //     nextwp.chi_valid = (i == 79 || i == 78);
+    //     nextwp.Va_d = trajectory.wps[i * 5 + 4];
+    //     waypoints_.push_back(nextwp);
+    //     num_waypoints_++;
+    // }
 }
 void path_manager_base::vehicle_state_callback(const rosplane_msgs::StateConstPtr& msg) {
     vehicle_state_ = *msg;
@@ -122,13 +122,85 @@ void path_manager_base::current_path_publish(const ros::TimerEvent&) {
     current_path_pub_.publish(current_path);
 }
 
+void path_manager_base::forwardRun() {
+    RosplaneDubins trajectory;
+    trajectory.init(nh_);
+    for (int i(0); i < 80; i++) {
+        // ros::Duration(1.0).sleep();
+
+        // rosplane_msgs::Waypoint new_waypoint;
+
+        // new_waypoint.w[0] = wps[i * 5 + 0];
+        // new_waypoint.w[1] = wps[i * 5 + 1];
+        // new_waypoint.w[2] = wps[i * 5 + 2];
+        // new_waypoint.chi_d = wps[i * 5 + 3];
+
+        // new_waypoint.chi_valid = true;
+        // new_waypoint.Va_d = wps[i * 5 + 4];
+        // if (i == 0)
+        //     new_waypoint.set_current = true;
+        // else
+        //     new_waypoint.set_current = false;
+        // new_waypoint.clear_wp_list = false;
+
+        // waypointPublisher.publish(new_waypoint);
+        waypoint_s nextwp;
+        nextwp.w[0] = trajectory.wps[i * 5 + 0];
+        nextwp.w[1] = trajectory.wps[i * 5 + 1];
+        nextwp.w[2] = trajectory.wps[i * 5 + 2];
+        nextwp.chi_d = trajectory.wps[i * 5 + 3];
+
+        nextwp.chi_valid = (i == 79 || i == 78);
+        nextwp.Va_d = trajectory.wps[i * 5 + 4];
+        waypoints_.push_back(nextwp);
+        num_waypoints_++;
+    }
+}
+
+void path_manager_base::backwardRun() {
+    RosplaneDubins trajectory;
+    trajectory.init(nh_);
+    for (int i(0); i < 80; i++) {
+        // ros::Duration(1.0).sleep();
+
+        // rosplane_msgs::Waypoint new_waypoint;
+
+        // new_waypoint.w[0] = wps[i * 5 + 0];
+        // new_waypoint.w[1] = wps[i * 5 + 1];
+        // new_waypoint.w[2] = wps[i * 5 + 2];
+        // new_waypoint.chi_d = wps[i * 5 + 3];
+
+        // new_waypoint.chi_valid = true;
+        // new_waypoint.Va_d = wps[i * 5 + 4];
+        // if (i == 0)
+        //     new_waypoint.set_current = true;
+        // else
+        //     new_waypoint.set_current = false;
+        // new_waypoint.clear_wp_list = false;
+
+        // waypointPublisher.publish(new_waypoint);
+        waypoint_s nextwp;
+        nextwp.w[0] = trajectory.backward_wps[i * 5 + 0];
+        nextwp.w[1] = trajectory.backward_wps[i * 5 + 1];
+        nextwp.w[2] = trajectory.backward_wps[i * 5 + 2];
+        nextwp.chi_d = trajectory.backward_wps[i * 5 + 3];
+
+        nextwp.chi_valid = (i == 79 || i == 78);
+        nextwp.Va_d = trajectory.backward_wps[i * 5 + 4];
+        waypoints_.push_back(nextwp);
+        num_waypoints_++;
+    }
+}
+
 }  // namespace rosplane
 
-int main(int argc, char** argv) {
-    ros::init(argc, argv, "rosplane_path_manager");
-    rosplane::path_manager_base* est = new rosplane::path_manager_example();
+// int main(int argc, char** argv) {
+//     ros::init(argc, argv, "rosplane_path_manager");
+//     rosplane::path_manager_base* est = new rosplane::path_manager_example();
+//     // est->forwardRun();
+//     // est->backwardRun();
 
-    ros::spin();
+//     ros::spin();
 
-    return 0;
-}
+//     return 0;
+// }
