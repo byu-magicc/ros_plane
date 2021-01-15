@@ -83,7 +83,7 @@ add_library(rosplane_path_planner
 add_dependencies(rosplane_path_planner ${catkin_EXPORTED_TARGETS})
 target_link_libraries(rosplane_path_planner ${catkin_LIBRARIES})
 
-add_executable(rosplane_path_manager
+add_library(rosplane_path_manager
             src/path_manager_base.cpp
             src/path_manager_example.cpp)
 add_dependencies(rosplane_path_manager ${catkin_EXPORTED_TARGETS})
