@@ -18,7 +18,7 @@
     <arg name="x"                   value="-5.0"/> 
     <arg name="y"                   value="0.0"/>
     <arg name="z"                   value="20"/>
-    <arg name="yaw"                 value="1.0"/> <!--This value needs to kept equal to the tangency_angle of the loop_entry_point declared in path_planner.cpp-->
+    <arg name="yaw"                 value="1.0"/> <!--For backward journey, initial heading was 2.35  while for forward journey it was 1.0-->
   </include>
 
   <group ns="$(arg mav_name)">
