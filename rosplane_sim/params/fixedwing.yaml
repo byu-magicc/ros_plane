@@ -133,4 +133,6 @@ num_loops: 8           # Total number of loops.
 speed_red_factor: 1    # Determines the factor by which the speed has to be reduced near the pylons.
 hunter_killer_x: 5     # x coordinate of the ship.
 hunter_killer_y: 0     # y coordinate of the ship.
+launch_pos_x: -5       # x coordinate of the launch position
+launch_pos_y: 0        # y coordinate of the launch position
 update_rate: 10
