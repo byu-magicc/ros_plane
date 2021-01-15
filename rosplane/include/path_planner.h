@@ -6,9 +6,11 @@ class RosplaneDubins {
   public:
     void init(ros::NodeHandle& nh);
     std::vector<float> wps;
+    std::vector<float> backward_wps;
 
   private:
-    void computePoints();
+    void computeForwardPoints();
+    void computeBackwardPoints();
 
     double left_y;
     double right_y;
@@ -16,6 +18,8 @@ class RosplaneDubins {
     double height;
     double hunter_killer_x;
     double hunter_killer_y;
+    double launch_pos_x;
+    double launch_pos_y;
     float Va;
     int num_waypoints;
     int num_loops;
