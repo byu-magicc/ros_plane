@@ -1,5 +1,12 @@
 # ROSplane
 
+## ROS 2 Transisiton
+
+This verison of ROSplane is no longer under development and no longer supported.
+ROSplane for ROS2 is currently under development and in beta, you can find ROSplane [here](https://github.com/rosflight/rosplane).
+
+## ROSplane for ROS 1
+
 ROSplane is limited-feature fixed-wing autopilot built around ROS. It is intended to be flown with [ROSflight](https://rosflight.org) as the hardware I/O or in the Gazebo simulation environment.  It is built according to the method published in [Small Unmanned Aircraft: Theory and Practice](http://uavbook.byu.edu/doku.php) by Beard and McLain, so as to allow anyone to easily understand, modify and use the code.  This framework is inherently modular and extensively documented so as to aid the user in understanding and extending for personal use.
 
 This repository features three ROS packages: rosplane, rosplane\_msgs, and rosplane\_sim. The contents of each of these three packages are described below.
