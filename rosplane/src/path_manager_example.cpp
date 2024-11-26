@@ -123,6 +123,8 @@ void path_manager_example::manage_fillet(const params_s &params, const input_s &
   Eigen::Vector3f w_i(waypoints_[idx_b].w);
   Eigen::Vector3f w_ip1(waypoints_[idx_c].w);
 
+  float chi_e;
+
   float R_min = params.R_min;
 
   output.Va_d = waypoints_[idx_a_].Va_d;
@@ -148,7 +150,18 @@ void path_manager_example::manage_fillet(const params_s &params, const input_s &
     output.lambda = 1;
     z = w_i - q_im1*(R_min/tanf(beta/2.0));
     if ((p - z).dot(q_im1) > 0)
-      fil_state_ = fillet_state::ORBIT;
+      chi_e = atan2f(q_i(1), q_i(0)) - vehicle_state_.chi;
+      while (chi_e > M_PI_F)
+        chi_e -= 2*M_PI_F;
+      while (chi_e < -M_PI_F)
+        chi_e += 2*M_PI_F;
+      if (abs(chi_e) > M_PI_F/18)
+        fil_state_ = fillet_state::ORBIT;
+      else if (idx_a_ == num_waypoints_ - 1)
+        idx_a_ = 0;
+      else
+        idx_a_++;
+        
     break;
   case fillet_state::ORBIT:
     output.flag = false;

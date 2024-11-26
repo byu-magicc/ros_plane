@@ -69,6 +69,8 @@ protected:
 
   virtual void manage(const struct params_s &params, const struct input_s &input, struct output_s &output) = 0;
 
+  rosplane_msgs::State vehicle_state_;     /**< vehicle state */
+
 private:
 
   ros::NodeHandle nh_;
@@ -79,7 +81,6 @@ private:
 
   struct params_s params_;
 
-  rosplane_msgs::State vehicle_state_;     /**< vehicle state */
 
   double update_rate_;
   ros::Timer update_timer_;
